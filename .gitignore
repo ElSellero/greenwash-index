@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# env files — secrets never enter git
+.env
+.env.*
+!.env.example
+
+# build output
+.next/
+out/
+
+# misc
+.DS_Store
+*.log
+logs/
+
+# local agent tooling — personal dev setup, not part of the app
+.claude/
+.agents/
+skills-lock.json
