@@ -1,6 +1,6 @@
 # greenwash-index Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** Execute task-by-task: fresh subagent (or focused work block) per task, then verify spec compliance and code quality before moving on. If the superpowers plugin is available, use superpowers:subagent-driven-development. Subagents inherit the parent model — no model downgrades. Steps use checkbox (`- [ ]`) syntax for tracking.
 > **For all frontend tasks (Phase 6–8):** REQUIRED SUB-SKILL: `ui-ux-pro-max:ui-ux-pro-max` must be invoked before writing UI code — it defines the design language (dark mission-control/cyberpunk) and component quality bar.
 
 **Goal:** A satirical data-visualization web app showing celebrities' vehicle CO2 emissions vs. their public climate advocacy on an interactive 3D globe, ranked by a transparent "Hypocrisy Score", self-maintaining via automated ingest pipelines.
