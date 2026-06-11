@@ -10,16 +10,20 @@ import type { LanguageModel } from 'ai';
  */
 const googleKey = () => process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
-/** High-volume headline classification: cheapest capable model. */
+/**
+ * Headline classification + research: gemini-3.5-flash (stable, structured
+ * outputs). If free-tier daily caps ever throttle the backfill too hard,
+ * switching the classifier to gemini-3.1-flash-lite (higher quota) is the knob.
+ */
 export const classifierModel = (): LanguageModel =>
   googleKey()
-    ? createGoogleGenerativeAI()('gemini-2.5-flash-lite')
+    ? createGoogleGenerativeAI()('gemini-3.5-flash')
     : 'anthropic/claude-haiku-4-5';
 
 /** One-time research: strongest model available on the active provider. */
 export const researchModel = (): LanguageModel =>
   googleKey()
-    ? createGoogleGenerativeAI()('gemini-2.5-flash')
+    ? createGoogleGenerativeAI()('gemini-3.5-flash')
     : 'anthropic/claude-opus-4-8';
 
 /** Pause between LLM calls — keeps the Gemini free tier under its RPM limit. */
