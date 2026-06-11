@@ -3,7 +3,7 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { db } from '../src/lib/db/client';
 import { persons, vehicles } from '../src/lib/db/schema';
-import { researchModel } from '../src/lib/ingest/llm';
+import { interCallDelayMs, researchModel } from '../src/lib/ingest/llm';
 
 const schema = z.object({
   found: z.boolean(),
@@ -37,6 +37,8 @@ const run = async () => {
     } else {
       console.log(`SKIPPED ${jet.personName} (${jet.name}) — no documented registration`);
     }
+    const delay = interCallDelayMs();
+    if (delay) await new Promise((r) => setTimeout(r, delay));
   }
   console.log('\nNow spot-check each CANDIDATE line, then run with --confirm <icao24...> to mark verified+live.');
 };
