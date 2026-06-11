@@ -1,7 +1,9 @@
+import { eq } from 'drizzle-orm';
 import { db } from '../src/lib/db/client';
 import { persons, events, seenArticles } from '../src/lib/db/schema';
 import { parseGdelt, dedupeArticles, type Article } from '../src/lib/ingest/news';
 import { classifyArticle, passesGuardrails, advocacyWeightFor } from '../src/lib/ingest/classify';
+import { interCallDelayMs } from '../src/lib/ingest/llm';
 import { createHash } from 'node:crypto';
 
 /** GDELT full-text archive reaches back years — query in 6-month windows. */
@@ -31,11 +33,15 @@ const run = async () => {
     console.log(`  ${articles.length} candidate articles`);
     for (const article of articles) {
       const hash = createHash('sha256').update(article.url).digest('hex');
-      const fresh = await db.insert(seenArticles).values({ urlHash: hash })
-        .onConflictDoNothing().returning();
-      if (fresh.length === 0) continue;
+      const seen = await db.select({ id: seenArticles.id }).from(seenArticles)
+        .where(eq(seenArticles.urlHash, hash)).limit(1);
+      if (seen.length > 0) continue;
       const c = await classifyArticle(p.name, article);
-      if (!c || !passesGuardrails(c, article.url)) continue;
+      const delay = interCallDelayMs();
+      if (delay) await new Promise((r) => setTimeout(r, delay));
+      if (!c) continue; // LLM error / rate limit — stays unseen, next run retries
+      await db.insert(seenArticles).values({ urlHash: hash }).onConflictDoNothing();
+      if (!passesGuardrails(c, article.url)) continue;
       await db.insert(events).values({
         personId: p.id, kind: c.kind, type: c.type, title: c.title,
         description: c.summary, sourceUrl: article.url,
