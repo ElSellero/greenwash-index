@@ -47,3 +47,4 @@ skills-lock.json
 
 # playwright mcp artifacts
 .playwright-mcp/
+.vercel
