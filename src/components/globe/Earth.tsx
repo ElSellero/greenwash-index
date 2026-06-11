@@ -1,17 +1,19 @@
 'use client';
-import { useMemo } from 'react';
-import { useLoader, useThree } from '@react-three/fiber';
+import { useMemo, useRef } from 'react';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
-  AdditiveBlending, BackSide, Color, ShaderMaterial, SRGBColorSpace, TextureLoader,
+  AdditiveBlending, BackSide, Color, Mesh, ShaderMaterial, SRGBColorSpace, TextureLoader,
 } from 'three';
 import { CONFIG } from '@/config';
 
 /*
- * Night texture: 8k from Solar System Scope (CC BY 4.0, attribution on /methodology),
- * falling back to the 2k three.js example texture on GPUs that cap at 4096.
+ * Day/clouds textures from Solar System Scope (CC BY 4.0, attribution on
+ * /methodology). 8k day map is GPU-gated with a 2k fallback below 8192
+ * maxTextureSize.
  */
-const TEXTURE_8K = '/textures/earth-night-8k.jpg';
-const TEXTURE_2K = '/textures/earth-night.png';
+const DAY_8K = '/textures/earth-day-8k.jpg';
+const DAY_2K = '/textures/earth-day-2k.jpg';
+const CLOUDS_2K = '/textures/earth-clouds-2k.jpg';
 
 /* Classic rim-glow atmosphere: back-side shell, additive fresnel falloff. */
 const ATMOSPHERE_VERT = /* glsl */ `
@@ -32,10 +34,14 @@ const ATMOSPHERE_FRAG = /* glsl */ `
 
 export const Earth = ({ segments = 96 }: { segments?: number }) => {
   const gl = useThree((s) => s.gl);
-  const textureUrl = gl.capabilities.maxTextureSize >= 8192 ? TEXTURE_8K : TEXTURE_2K;
-  const nightMap = useLoader(TextureLoader, textureUrl);
-
+  const dayUrl = gl.capabilities.maxTextureSize >= 8192 ? DAY_8K : DAY_2K;
+  const [dayMap, cloudMap] = useLoader(TextureLoader, [dayUrl, CLOUDS_2K]);
   const anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
+
+  const clouds = useRef<Mesh>(null);
+  useFrame((_, delta) => {
+    if (clouds.current) clouds.current.rotation.y += delta * 0.006; // slow drift
+  });
 
   const atmosphereMaterial = useMemo(
     () => new ShaderMaterial({
@@ -56,14 +62,22 @@ export const Earth = ({ segments = 96 }: { segments?: number }) => {
       <mesh>
         <sphereGeometry args={[r, segments, segments]} />
         <meshStandardMaterial
-          map={nightMap}
+          map={dayMap}
           map-colorSpace={SRGBColorSpace}
           map-anisotropy={anisotropy}
-          emissiveMap={nightMap}
-          emissive="#ffd9a0"
-          emissiveIntensity={1.2}
-          color="#0a1428"
           roughness={1}
+        />
+      </mesh>
+      {/* cloud shell: additive so dark areas vanish, white clouds glow softly */}
+      <mesh ref={clouds}>
+        <sphereGeometry args={[r * 1.012, segments, segments]} />
+        <meshStandardMaterial
+          map={cloudMap}
+          map-colorSpace={SRGBColorSpace}
+          transparent
+          opacity={0.35}
+          blending={AdditiveBlending}
+          depthWrite={false}
         />
       </mesh>
       <mesh material={atmosphereMaterial}>

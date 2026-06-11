@@ -116,8 +116,8 @@ This repo is public and treated accordingly: secrets exist only in environment s
 
 ## Credits
 
-Earth night texture by [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0),
-2k fallback from the [three.js](https://threejs.org) examples (MIT). Live flight data by [adsb.lol](https://adsb.lol).
+Earth textures (day map, clouds) by [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0).
+Live flight data by [adsb.lol](https://adsb.lol).
 News discovery via Google News RSS and [GDELT](https://www.gdeltproject.org/).
 
 ## Legal & editorial stance
