@@ -1,7 +1,7 @@
 'use client';
-import { Suspense, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerformanceMonitor } from '@react-three/drei';
+import { OrbitControls, PerformanceMonitor, Stars } from '@react-three/drei';
 import { Earth } from './Earth';
 import { VehicleMarkers } from './VehicleMarkers';
 import { RouteArcs } from './RouteArcs';
@@ -9,8 +9,15 @@ import { CameraRig } from './CameraRig';
 import type { PositionsPayload } from '@/lib/api-types';
 
 export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
-  const [dpr, setDpr] = useState(1.5);
-  const [segments, setSegments] = useState(64);
+  // start at native sharpness; PerformanceMonitor declines on weak GPUs
+  const [dpr, setDpr] = useState(() =>
+    typeof window === 'undefined' ? 1.5 : Math.min(2, window.devicePixelRatio));
+  const [segments, setSegments] = useState(96);
+  const reducedMotion = useMemo(
+    () => typeof window !== 'undefined'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    [],
+  );
   return (
     <Canvas
       dpr={dpr}
@@ -19,10 +26,11 @@ export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
       gl={{ antialias: true, powerPreference: 'high-performance' }}
     >
       <PerformanceMonitor
-        onDecline={() => { setDpr(1); setSegments(32); }}
-        onIncline={() => setDpr(Math.min(2, window.devicePixelRatio))}
+        onDecline={() => { setDpr(1); setSegments(48); }}
+        onIncline={() => { setDpr(Math.min(2, window.devicePixelRatio)); setSegments(96); }}
       />
       <ambientLight intensity={0.4} />
+      <Stars radius={40} depth={30} count={4000} factor={3} saturation={0} fade speed={reducedMotion ? 0 : 0.5} />
       <Suspense fallback={null}>
         <Earth segments={segments} />
         <VehicleMarkers positions={data.positions} />
@@ -37,6 +45,8 @@ export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
         maxDistance={4}
         rotateSpeed={0.5}
         zoomSpeed={0.6}
+        autoRotate={!reducedMotion}
+        autoRotateSpeed={0.25}
       />
     </Canvas>
   );
