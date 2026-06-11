@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { eq } from 'drizzle-orm';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { db } from '@/lib/db/client';
@@ -71,12 +72,15 @@ export const runNewsScan = async (): Promise<{ scanned: number; stored: number }
       if (classified >= MAX_CLASSIFICATIONS_PER_RUN) break;
       scanned++;
       const hash = urlHash(article.url);
-      const inserted = await db.insert(seenArticles).values({ urlHash: hash })
-        .onConflictDoNothing().returning();
-      if (inserted.length === 0) continue; // already processed
+      const seen = await db.select({ id: seenArticles.id }).from(seenArticles)
+        .where(eq(seenArticles.urlHash, hash)).limit(1);
+      if (seen.length > 0) continue; // already processed
       classified++;
       const c = await classifyArticle(p.name, article);
-      if (!c || !passesGuardrails(c, article.url)) continue;
+      if (!c) continue; // LLM error (e.g. missing gateway key) — retry next run
+      // consume only after a successful classification
+      await db.insert(seenArticles).values({ urlHash: hash }).onConflictDoNothing();
+      if (!passesGuardrails(c, article.url)) continue;
       await db.insert(events).values({
         personId: p.id,
         kind: c.kind,
