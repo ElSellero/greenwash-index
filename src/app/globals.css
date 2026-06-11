@@ -1,26 +1,30 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-abyss: #05080f;        /* page background */
+  --color-panel: #0a1020;        /* cards/sidebar */
+  --color-panel-edge: #1a2a45;   /* borders */
+  --color-grid: #0f1830;
+  --color-pos: #22ff88;          /* positive / green */
+  --color-neg: #ff3b5c;          /* negative / red */
+  --color-accent: #38bdf8;       /* cyan highlights, routes */
+  --color-dim: #7d8db1;          /* secondary text */
+  --font-sans: var(--font-fira-sans), system-ui, sans-serif;
+  --font-mono-num: var(--font-fira-code), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-abyss);
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+}
+
+/* All data/numbers use tabular figures — ticking values must not shift layout. */
+.font-num {
+  font-family: var(--font-mono-num);
+  font-feature-settings: "tnum";
 }
