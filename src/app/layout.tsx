@@ -17,7 +17,14 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="en" className={`${firaSans.variable} ${firaCode.variable}`}>
-    <body className="antialiased">{children}</body>
+    <body className="antialiased">
+      {children}
+      <footer className="pointer-events-auto fixed bottom-1 right-2 z-30 text-[10px] text-dim">
+        <a href="/methodology" className="hover:text-accent">methodology</a> ·{' '}
+        <a href="/imprint" className="hover:text-accent">imprint</a> ·{' '}
+        <a href="/privacy" className="hover:text-accent">privacy</a>
+      </footer>
+    </body>
   </html>
 );
 

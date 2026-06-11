@@ -1,0 +1,66 @@
+import { CONFIG } from '@/config';
+import { JET_MODEL_KG_PER_KM } from '@/lib/score/co2';
+
+const MethodologyPage = () => (
+  <main className="mx-auto max-w-3xl px-4 py-10 text-sm leading-6">
+    <h1 className="text-2xl font-semibold">Methodology</h1>
+    <p className="mt-3 text-dim">
+      The Greenwash Index is a satirical, editorial data project. Every ranking is an opinion
+      computed from publicly sourced facts via the open formula below. The code is open source.
+    </p>
+    <h2 className="mt-8 text-lg font-medium">The Hypocrisy Score</h2>
+    <pre className="mt-2 rounded bg-panel p-3 font-[family-name:var(--font-mono-num)] text-xs">
+{`score      = co2Tons12m × multiplier
+multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ weight × 0.5^(ageDays / ${CONFIG.score.halfLifeDays}))`}
+    </pre>
+    <table className="mt-4 w-full text-left text-xs">
+      <thead><tr className="text-dim"><th className="py-1">Advocacy event</th><th>Weight</th></tr></thead>
+      <tbody>
+        {Object.entries(CONFIG.score.advocacyWeights).map(([type, weight]) => (
+          <tr key={type} className="border-t border-panel-edge">
+            <td className="py-1 capitalize">{type}</td>
+            <td className="font-[family-name:var(--font-mono-num)]">{weight}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <h2 className="mt-8 text-lg font-medium">Emission factors (kg CO2 per km)</h2>
+    <table className="mt-2 w-full text-left text-xs">
+      <tbody>
+        {Object.entries(JET_MODEL_KG_PER_KM).map(([model, kg]) => (
+          <tr key={model} className="border-t border-panel-edge">
+            <td className="py-1">{model}</td>
+            <td className="font-[family-name:var(--font-mono-num)]">{kg}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p className="mt-2 text-xs text-dim">
+      Derived from published fuel-burn figures × 3.16 kg CO2 per kg Jet-A. Yachts default to 90 kg/km.
+      All figures are estimates, not measurements.
+    </p>
+    <h2 className="mt-8 text-lg font-medium">Data provenance &amp; labels</h2>
+    <ul className="mt-2 list-disc space-y-1 pl-5 text-dim">
+      <li><b className="text-pos">LIVE</b> — public ADS-B transponder data (adsb.lol).</li>
+      <li><b>SIMULATED</b> — plausible fictional voyages for vehicles without public tracking. Never the basis for claims about a real trip.</li>
+      <li><b className="text-accent">AI-CLASSIFIED</b> — events extracted from news articles by a language model
+        (confidence ≥ {CONFIG.score.confidenceThreshold}); the linked source is authoritative, our classification is editorial.</li>
+    </ul>
+    <h2 className="mt-8 text-lg font-medium">Corrections</h2>
+    <p className="mt-2 text-dim">
+      Spotted an event whose source doesn&apos;t support it? Open an issue on GitHub or write to the
+      address in the imprint — substantiated complaints lead to correction or removal.
+    </p>
+    <h2 className="mt-8 text-lg font-medium">Credits</h2>
+    <p className="mt-2 text-xs text-dim">
+      Earth night texture: {' '}
+      <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener noreferrer"
+        className="text-accent hover:underline">Solar System Scope</a>{' '}
+      (CC BY 4.0); fallback texture from the three.js examples (MIT). Live flight data:{' '}
+      <a href="https://adsb.lol" target="_blank" rel="noopener noreferrer"
+        className="text-accent hover:underline">adsb.lol</a>.
+    </p>
+  </main>
+);
+
+export default MethodologyPage;
