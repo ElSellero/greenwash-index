@@ -29,7 +29,9 @@ export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
         onDecline={() => { setDpr(1); setSegments(48); }}
         onIncline={() => { setDpr(Math.min(2, window.devicePixelRatio)); setSegments(96); }}
       />
-      <ambientLight intensity={0.4} />
+      {/* even, vivid daylight: strong ambient + soft sun for relief */}
+      <ambientLight intensity={1.1} />
+      <directionalLight position={[5, 3, 5]} intensity={1.4} />
       <Stars radius={40} depth={30} count={4000} factor={3} saturation={0} fade speed={reducedMotion ? 0 : 0.5} />
       <Suspense fallback={null}>
         <Earth segments={segments} />
