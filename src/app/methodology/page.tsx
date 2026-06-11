@@ -53,10 +53,10 @@ multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ weight × 0.5^(ageDay
     </p>
     <h2 className="mt-8 text-lg font-medium">Credits</h2>
     <p className="mt-2 text-xs text-dim">
-      Earth night texture: {' '}
+      Earth textures (day map, clouds): {' '}
       <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener noreferrer"
         className="text-accent hover:underline">Solar System Scope</a>{' '}
-      (CC BY 4.0); fallback texture from the three.js examples (MIT). Live flight data:{' '}
+      (CC BY 4.0). Live flight data:{' '}
       <a href="https://adsb.lol" target="_blank" rel="noopener noreferrer"
         className="text-accent hover:underline">adsb.lol</a>.
     </p>
