@@ -103,6 +103,23 @@ One-time data bootstrap: `tsx scripts/research-vehicles.ts` (verify jets), then 
 
 This repo is public and treated accordingly: secrets exist only in environment stores (never in git history), ingest endpoints use timing-safe token comparison, workflows run with read-only permissions and no third-party actions, every external payload is schema-validated, and Dependabot watches the supply chain. If you find a vulnerability, please report it via a private security advisory rather than a public issue.
 
+## Launch checklist
+
+- [ ] Imprint filled with real operator data (legal requirement)
+- [ ] All `verified: false` jets confirmed or left simulated
+- [ ] Backfill run; spot-check 20 random events against their sources
+- [ ] Daily cron ran twice without errors (Vercel logs)
+- [ ] GitHub Actions live tick green for 24h
+- [ ] AdSense: apply only after content is stable; then set NEXT_PUBLIC_ADSENSE_CLIENT
+      and configure the GDPR message under Privacy & messaging
+- [ ] Lighthouse: mobile performance ≥ 80, no console errors on mid-range phone
+
+## Credits
+
+Earth night texture by [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0),
+2k fallback from the [three.js](https://threejs.org) examples (MIT). Live flight data by [adsb.lol](https://adsb.lol).
+News discovery via Google News RSS and [GDELT](https://www.gdeltproject.org/).
+
 ## Legal & editorial stance
 
 This is a **satirical, editorial project** about persons of public interest. All factual claims link to their sources; scores are opinions computed by the open formula above; simulated data is labeled and never presented as fact. We don't dox: shown positions come from data these vehicles broadcast publicly, or are fiction marked as fiction.
