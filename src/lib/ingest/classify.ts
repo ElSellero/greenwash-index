@@ -51,19 +51,30 @@ export const classifyArticle = async (
 export const advocacyWeightFor = (type: Classification['type']): number =>
   CONFIG.score.advocacyWeights[type as keyof typeof CONFIG.score.advocacyWeights] ?? 1;
 
+/**
+ * Serverless time budget: classifying a full backlog (first run ≈ 1000 fresh
+ * articles) would exceed any maxDuration. Articles beyond the cap are NOT
+ * marked seen — the backlog drains across subsequent runs.
+ */
+const MAX_CLASSIFICATIONS_PER_RUN = 80;
+
 /** Daily scan: new articles for every person → classified, guarded, stored. */
 export const runNewsScan = async (): Promise<{ scanned: number; stored: number }> => {
   const allPersons = await db.select().from(persons);
   let scanned = 0;
   let stored = 0;
+  let classified = 0;
   for (const p of allPersons) {
+    if (classified >= MAX_CLASSIFICATIONS_PER_RUN) break;
     const articles = await fetchArticlesFor(p.name);
     for (const article of articles) {
+      if (classified >= MAX_CLASSIFICATIONS_PER_RUN) break;
       scanned++;
       const hash = urlHash(article.url);
       const inserted = await db.insert(seenArticles).values({ urlHash: hash })
         .onConflictDoNothing().returning();
       if (inserted.length === 0) continue; // already processed
+      classified++;
       const c = await classifyArticle(p.name, article);
       if (!c || !passesGuardrails(c, article.url)) continue;
       await db.insert(events).values({
