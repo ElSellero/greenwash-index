@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import type { LeaderboardEntry } from '@/lib/api-types';
 import { LeaderboardRow } from './LeaderboardRow';
+import { AdSlot } from '@/components/ui/AdSlot';
 import { useAppStore } from '@/lib/store';
 
 export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
@@ -43,6 +44,7 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto">
         {filtered.map((e) => <LeaderboardRow key={e.personId} entry={e} />)}
+        <li className="p-2"><AdSlot slot="sidebar-bottom" /></li>
       </ul>
     </aside>
   );
