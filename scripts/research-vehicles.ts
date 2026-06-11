@@ -3,6 +3,7 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { db } from '../src/lib/db/client';
 import { persons, vehicles } from '../src/lib/db/schema';
+import { researchModel } from '../src/lib/ingest/llm';
 
 const schema = z.object({
   found: z.boolean(),
@@ -21,7 +22,7 @@ const run = async () => {
 
   for (const jet of jets) {
     const { object } = await generateObject({
-      model: 'anthropic/claude-opus-4-8', // one-time job: use the strong model
+      model: researchModel(), // one-time job: strongest model of the active provider
       schema,
       prompt: `Find the publicly documented aircraft registration (tail number) and ICAO24 hex code for the ${jet.name} associated with ${jet.personName}. Only report values documented in public sources (FAA registry, planespotters.net, news articles about celebrity jet tracking). Provide the URL of the best source as verificationUrl. If ownership is not publicly documented or was sold, return found=false.`,
     });
