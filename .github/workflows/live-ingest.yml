@@ -1,0 +1,16 @@
+name: live-ingest
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # keep in sync with CONFIG.live.intervalMinutes
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger live ingest
+        run: |
+          curl -fsS -X POST "${{ secrets.APP_URL }}/api/ingest/live" \
+            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
+            --max-time 110
