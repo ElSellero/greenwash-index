@@ -45,7 +45,7 @@ const run = async () => {
       await db.insert(events).values({
         personId: p.id, kind: c.kind, type: c.type, title: c.title,
         description: c.summary, sourceUrl: article.url,
-        occurredAt: new Date(`${c.eventDate}T12:00:00Z`),
+        occurredAt: new Date(`${c.eventDate.slice(0, 10)}T12:00:00Z`),
         advocacyWeight: c.kind === 'positive' ? advocacyWeightFor(c.type) : null,
         confidence: c.confidence, autoClassified: true,
       });

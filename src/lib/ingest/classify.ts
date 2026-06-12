@@ -15,7 +15,8 @@ export const classificationSchema = z.object({
   title: z.string().max(140),
   summary: z.string().max(400),
   confidence: z.number().min(0).max(1),
-  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // accepts plain dates and full ISO timestamps; consumers slice to the date part
+  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}/),
 });
 export type Classification = z.infer<typeof classificationSchema>;
 
@@ -31,7 +32,8 @@ Classify ONLY what the article headline explicitly supports. Rules:
 - "positive" = verifiable pro-climate act: donation, green investment, interview, speech, social post — type "preaching" ONLY if they publicly urge OTHERS to fly less / eat less meat / live greener.
 - "negative" = documented high-emission act (charter flight reported, new yacht, mansion purchase).
 - relevant=false for gossip, unrelated business news, or speculation.
-- NEVER infer beyond the headline. Low information ⇒ low confidence.`;
+- NEVER infer beyond the headline. Low information ⇒ low confidence.
+- eventDate: the date only, formatted YYYY-MM-DD.`;
 
 export const classifyArticle = async (
   personName: string,
@@ -87,7 +89,7 @@ export const runNewsScan = async (): Promise<{ scanned: number; stored: number }
         title: c.title,
         description: c.summary,
         sourceUrl: article.url,
-        occurredAt: new Date(`${c.eventDate}T12:00:00Z`),
+        occurredAt: new Date(`${c.eventDate.slice(0, 10)}T12:00:00Z`),
         advocacyWeight: c.kind === 'positive' ? advocacyWeightFor(c.type) : null,
         confidence: c.confidence,
         autoClassified: true,
