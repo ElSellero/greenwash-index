@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db/client';
 import { events, persons, seenArticles } from '@/lib/db/schema';
 import { fetchArticlesFor, type Article } from './news';
-import { classifierModel, interCallDelayMs } from './llm';
+import { classifierModel, interCallDelayMs, maxClassificationsPerRun } from './llm';
 import { CONFIG } from '@/config';
 
 export const classificationSchema = z.object({
@@ -53,24 +53,20 @@ export const classifyArticle = async (
 export const advocacyWeightFor = (type: Classification['type']): number =>
   CONFIG.score.advocacyWeights[type as keyof typeof CONFIG.score.advocacyWeights] ?? 1;
 
-/**
- * Serverless time budget: classifying a full backlog (first run ≈ 1000 fresh
- * articles) would exceed any maxDuration. Articles beyond the cap are NOT
- * marked seen — the backlog drains across subsequent runs.
- */
-const MAX_CLASSIFICATIONS_PER_RUN = 80;
-
 /** Daily scan: new articles for every person → classified, guarded, stored. */
 export const runNewsScan = async (): Promise<{ scanned: number; stored: number }> => {
+  // Articles beyond the per-run cap are NOT marked seen — the backlog drains
+  // across subsequent runs instead of blowing the serverless time budget.
+  const cap = maxClassificationsPerRun();
   const allPersons = await db.select().from(persons);
   let scanned = 0;
   let stored = 0;
   let classified = 0;
   for (const p of allPersons) {
-    if (classified >= MAX_CLASSIFICATIONS_PER_RUN) break;
+    if (classified >= cap) break;
     const articles = await fetchArticlesFor(p.name);
     for (const article of articles) {
-      if (classified >= MAX_CLASSIFICATIONS_PER_RUN) break;
+      if (classified >= cap) break;
       scanned++;
       const hash = urlHash(article.url);
       const seen = await db.select({ id: seenArticles.id }).from(seenArticles)

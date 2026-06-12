@@ -1,14 +1,16 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 const NAME = process.env.NEXT_PUBLIC_IMPRINT_NAME;
 const STREET = process.env.NEXT_PUBLIC_IMPRINT_STREET;
 const CITY = process.env.NEXT_PUBLIC_IMPRINT_CITY;
 const EMAIL = process.env.NEXT_PUBLIC_IMPRINT_EMAIL;
 
+const emptySubscribe = () => () => {};
+const useHydrated = () => useSyncExternalStore(emptySubscribe, () => true, () => false);
+
 export const ImprintDetails = () => {
-  const [show, setShow] = useState(false);
-  useEffect(() => setShow(true), []);
+  const show = useHydrated();
 
   if (!show) {
     return <p className="mt-2 text-dim">Loading operator details…</p>;
