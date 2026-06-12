@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db/client';
 import { events, persons, seenArticles } from '@/lib/db/schema';
 import { fetchArticlesFor, type Article } from './news';
+import { classifierModel, interCallDelayMs } from './llm';
 import { CONFIG } from '@/config';
 
 export const classificationSchema = z.object({
@@ -38,7 +39,7 @@ export const classifyArticle = async (
 ): Promise<Classification | null> => {
   try {
     const { object } = await generateObject({
-      model: 'anthropic/claude-haiku-4-5',
+      model: classifierModel(),
       schema: classificationSchema,
       system: SYSTEM,
       prompt: `Person: ${personName}\nHeadline: ${article.title}\nPublished: ${article.publishedAt.toISOString()}`,
@@ -77,7 +78,9 @@ export const runNewsScan = async (): Promise<{ scanned: number; stored: number }
       if (seen.length > 0) continue; // already processed
       classified++;
       const c = await classifyArticle(p.name, article);
-      if (!c) continue; // LLM error (e.g. missing gateway key) — retry next run
+      const delay = interCallDelayMs();
+      if (delay) await new Promise((r) => setTimeout(r, delay));
+      if (!c) continue; // LLM error (e.g. rate limit, missing key) — retry next run
       // consume only after a successful classification
       await db.insert(seenArticles).values({ urlHash: hash }).onConflictDoNothing();
       if (!passesGuardrails(c, article.url)) continue;
