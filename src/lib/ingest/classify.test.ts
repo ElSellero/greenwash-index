@@ -26,4 +26,10 @@ describe('classificationSchema', () => {
   it('rejects invalid advocacy types', () => {
     expect(classificationSchema.safeParse({ ...base, type: 'sorcery' }).success).toBe(false);
   });
+  it('accepts full ISO timestamps as eventDate (Gemini emits these)', () => {
+    expect(classificationSchema.safeParse({ ...base, eventDate: '2026-06-08T12:00:00.000Z' }).success).toBe(true);
+  });
+  it('rejects non-date eventDate', () => {
+    expect(classificationSchema.safeParse({ ...base, eventDate: 'June 8th' }).success).toBe(false);
+  });
 });
