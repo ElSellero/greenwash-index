@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db/client';
 import { events, persons, seenArticles } from '@/lib/db/schema';
 import { fetchArticlesFor, type Article } from './news';
-import { classifierModel, interCallDelayMs } from './llm';
+import { classifierModel, interCallDelayMs, maxClassificationsPerRun } from './llm';
 import { CONFIG } from '@/config';
 
 export const classificationSchema = z.object({
@@ -15,7 +15,8 @@ export const classificationSchema = z.object({
   title: z.string().max(140),
   summary: z.string().max(400),
   confidence: z.number().min(0).max(1),
-  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // accepts plain dates and full ISO timestamps; consumers slice to the date part
+  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}/),
 });
 export type Classification = z.infer<typeof classificationSchema>;
 
@@ -31,7 +32,8 @@ Classify ONLY what the article headline explicitly supports. Rules:
 - "positive" = verifiable pro-climate act: donation, green investment, interview, speech, social post — type "preaching" ONLY if they publicly urge OTHERS to fly less / eat less meat / live greener.
 - "negative" = documented high-emission act (charter flight reported, new yacht, mansion purchase).
 - relevant=false for gossip, unrelated business news, or speculation.
-- NEVER infer beyond the headline. Low information ⇒ low confidence.`;
+- NEVER infer beyond the headline. Low information ⇒ low confidence.
+- eventDate: the date only, formatted YYYY-MM-DD.`;
 
 export const classifyArticle = async (
   personName: string,
@@ -53,24 +55,20 @@ export const classifyArticle = async (
 export const advocacyWeightFor = (type: Classification['type']): number =>
   CONFIG.score.advocacyWeights[type as keyof typeof CONFIG.score.advocacyWeights] ?? 1;
 
-/**
- * Serverless time budget: classifying a full backlog (first run ≈ 1000 fresh
- * articles) would exceed any maxDuration. Articles beyond the cap are NOT
- * marked seen — the backlog drains across subsequent runs.
- */
-const MAX_CLASSIFICATIONS_PER_RUN = 80;
-
 /** Daily scan: new articles for every person → classified, guarded, stored. */
 export const runNewsScan = async (): Promise<{ scanned: number; stored: number }> => {
+  // Articles beyond the per-run cap are NOT marked seen — the backlog drains
+  // across subsequent runs instead of blowing the serverless time budget.
+  const cap = maxClassificationsPerRun();
   const allPersons = await db.select().from(persons);
   let scanned = 0;
   let stored = 0;
   let classified = 0;
   for (const p of allPersons) {
-    if (classified >= MAX_CLASSIFICATIONS_PER_RUN) break;
+    if (classified >= cap) break;
     const articles = await fetchArticlesFor(p.name);
     for (const article of articles) {
-      if (classified >= MAX_CLASSIFICATIONS_PER_RUN) break;
+      if (classified >= cap) break;
       scanned++;
       const hash = urlHash(article.url);
       const seen = await db.select({ id: seenArticles.id }).from(seenArticles)
@@ -91,7 +89,7 @@ export const runNewsScan = async (): Promise<{ scanned: number; stored: number }
         title: c.title,
         description: c.summary,
         sourceUrl: article.url,
-        occurredAt: new Date(`${c.eventDate}T12:00:00Z`),
+        occurredAt: new Date(`${c.eventDate.slice(0, 10)}T12:00:00Z`),
         advocacyWeight: c.kind === 'positive' ? advocacyWeightFor(c.type) : null,
         confidence: c.confidence,
         autoClassified: true,
