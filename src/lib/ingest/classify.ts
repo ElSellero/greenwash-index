@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db/client';
 import { events, persons, seenArticles } from '@/lib/db/schema';
 import { fetchArticlesFor, type Article } from './news';
-import { classifierModel, interCallDelayMs, maxClassificationsPerRun } from './llm';
+import { classifierModels, interCallDelayMs, maxClassificationsPerRun, withModelFallback } from './llm';
 import { CONFIG } from '@/config';
 
 export const classificationSchema = z.object({
@@ -40,12 +40,14 @@ export const classifyArticle = async (
   article: Article,
 ): Promise<Classification | null> => {
   try {
-    const { object } = await generateObject({
-      model: classifierModel(),
-      schema: classificationSchema,
-      system: SYSTEM,
-      prompt: `Person: ${personName}\nHeadline: ${article.title}\nPublished: ${article.publishedAt.toISOString()}`,
-    });
+    const { object } = await withModelFallback(classifierModels(), (model) =>
+      generateObject({
+        model,
+        schema: classificationSchema,
+        system: SYSTEM,
+        prompt: `Person: ${personName}\nHeadline: ${article.title}\nPublished: ${article.publishedAt.toISOString()}`,
+      }),
+    );
     return object;
   } catch {
     return null;
