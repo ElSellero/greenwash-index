@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../src/lib/db/client';
-import { persons, events, seenArticles } from '../src/lib/db/schema';
+import { persons, seenArticles } from '../src/lib/db/schema';
 import { parseGdelt, dedupeArticles, type Article } from '../src/lib/ingest/news';
-import { classifyArticle, passesGuardrails, advocacyWeightFor } from '../src/lib/ingest/classify';
+import { classifyArticle, passesGuardrails, storeClassifiedEvent } from '../src/lib/ingest/classify';
 import { interCallDelayMs } from '../src/lib/ingest/llm';
 import { createHash } from 'node:crypto';
 
@@ -42,14 +42,9 @@ const run = async () => {
       if (!c) continue; // LLM error / rate limit — stays unseen, next run retries
       await db.insert(seenArticles).values({ urlHash: hash }).onConflictDoNothing();
       if (!passesGuardrails(c, article.url)) continue;
-      await db.insert(events).values({
-        personId: p.id, kind: c.kind, type: c.type, title: c.title,
-        description: c.summary, sourceUrl: article.url,
-        occurredAt: new Date(`${c.eventDate.slice(0, 10)}T12:00:00Z`),
-        advocacyWeight: c.kind === 'positive' ? advocacyWeightFor(c.type) : null,
-        confidence: c.confidence, autoClassified: true,
-      });
-      console.log(`  + [${c.kind}/${c.type}] ${c.title}`);
+      const result = await storeClassifiedEvent(p.id, c, article.url);
+      const mark = result === 'merged' ? '~ (merged source)' : result === 'echo' ? '· (echo)' : '+';
+      console.log(`  ${mark} [${c.kind}/${c.type}] ${c.title}`);
     }
   }
 };

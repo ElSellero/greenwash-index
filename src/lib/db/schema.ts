@@ -33,10 +33,12 @@ export const events = pgTable('events', {
   type: text('type').notNull(), // positive: post|donation|investment|interview|speech|preaching ; negative: flight|yacht_trip|asset
   title: text('title').notNull(),
   description: text('description').notNull().default(''),
-  sourceUrl: text('source_url').notNull(), // HARD REQUIREMENT (legal)
+  sourceUrl: text('source_url').notNull(), // HARD REQUIREMENT (legal) — primary source
+  extraSources: text('extra_sources').array(), // additional outlets corroborating the same act
   occurredAt: timestamp('occurred_at').notNull(),
   co2Kg: real('co2_kg'), // negative events only
   advocacyWeight: integer('advocacy_weight'), // positive events only, 1–5
+  weightFactor: real('weight_factor').notNull().default(1), // <1 = echo/repeat of a prior act
   confidence: real('confidence'), // LLM confidence, null = human-entered
   autoClassified: boolean('auto_classified').notNull().default(false),
   reviewed: boolean('reviewed').notNull().default(false),
