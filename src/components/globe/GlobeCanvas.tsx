@@ -1,13 +1,21 @@
 'use client';
-import { Suspense, useMemo, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Suspense, useMemo, useRef, useState } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerformanceMonitor, Stars } from '@react-three/drei';
+import type { DirectionalLight } from 'three';
 import { Earth } from './Earth';
 import { VehicleMarkers } from './VehicleMarkers';
 import { RouteArcs } from './RouteArcs';
 import { CameraRig } from './CameraRig';
 import { useAppStore } from '@/lib/store';
 import type { PositionsPayload } from '@/lib/api-types';
+
+/** A sun that tracks the camera, so the hemisphere you look at is always lit. */
+const Headlight = () => {
+  const light = useRef<DirectionalLight>(null);
+  useFrame(({ camera }) => light.current?.position.copy(camera.position));
+  return <directionalLight ref={light} intensity={2.2} />;
+};
 
 export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
   // start at native sharpness; PerformanceMonitor declines on weak GPUs
@@ -31,9 +39,9 @@ export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
         onDecline={() => { setDpr(1); setSegments(48); }}
         onIncline={() => { setDpr(Math.min(2, window.devicePixelRatio)); setSegments(96); }}
       />
-      {/* even, vivid daylight: strong ambient + soft sun for relief */}
-      <ambientLight intensity={1.1} />
-      <directionalLight position={[5, 3, 5]} intensity={1.4} />
+      {/* camera-following headlight keeps the viewed hemisphere lit at any angle */}
+      <ambientLight intensity={1.4} />
+      <Headlight />
       <Stars radius={40} depth={30} count={4000} factor={3} saturation={0} fade speed={reducedMotion ? 0 : 0.5} />
       <Suspense fallback={null}>
         <Earth segments={segments} />
