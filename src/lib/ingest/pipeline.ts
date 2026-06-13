@@ -120,11 +120,12 @@ export const runDailyPipeline = async (now = new Date()) => {
       kg24h: sql<number>`coalesce(sum(${events.co2Kg}) filter (where ${events.occurredAt} >= ${dayStart}), 0)`,
     }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'negative')));
     const advocacy = await db.select({
-      weight: events.advocacyWeight, occurredAt: events.occurredAt,
+      weight: events.advocacyWeight, weightFactor: events.weightFactor, occurredAt: events.occurredAt,
     }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'positive')));
 
     const m = advocacyMultiplier(
-      advocacy.map((a) => ({ weight: a.weight ?? 1, occurredAt: a.occurredAt })), now);
+      // echo/repeat events carry weightFactor < 1 so repetition can't inflate the score
+      advocacy.map((a) => ({ weight: (a.weight ?? 1) * (a.weightFactor ?? 1), occurredAt: a.occurredAt })), now);
     const co2Kg12m = sums[0]?.kg12m ?? 0;
     scored.push({
       personId: p.id,

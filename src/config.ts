@@ -25,6 +25,17 @@ export const CONFIG = {
       speech: 3,
       preaching: 5,
     } as const,
+    /** News-event de-duplication so one real act isn't counted many times. */
+    dedup: {
+      /** Same person + type within this many days = the SAME act: extra
+       *  articles are merged as additional sources, never re-counted. */
+      sameEventWindowDays: 4,
+      /** A later re-statement of the same act (within this window, beyond the
+       *  same-event window) still counts, but down-weighted by echoWeightFactor. */
+      echoWindowDays: 21,
+      /** Weight multiplier applied to such echo/repeat events. */
+      echoWeightFactor: 0.35,
+    },
   },
   co2: {
     /** Fallback when a jet model is unknown (kg CO2 per km). */
