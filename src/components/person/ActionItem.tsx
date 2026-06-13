@@ -4,6 +4,8 @@ import { formatCo2Kg } from '@/lib/format';
 
 export const ActionItem = ({ event }: { event: PersonDetail['events'][number] }) => {
   const positive = event.kind === 'positive';
+  const sources = [event.sourceUrl, ...(event.extraSources ?? [])];
+  const isEcho = event.weightFactor < 1;
   return (
     <li className={`rounded-lg border p-3 ${positive ? 'border-pos/25 bg-pos/5' : 'border-neg/25 bg-neg/5'}`}>
       <div className="flex items-baseline justify-between gap-2">
@@ -18,8 +20,17 @@ export const ActionItem = ({ event }: { event: PersonDetail['events'][number] })
       <p className="mt-1 text-sm font-medium">{event.title}</p>
       {event.description && <p className="mt-0.5 text-xs text-dim">{event.description}</p>}
       <div className="mt-2 flex items-center justify-between text-xs">
-        <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer"
-          className="text-accent underline-offset-2 hover:underline">source ↗</a>
+        <span className="flex items-center gap-1.5">
+          <a href={sources[0]} target="_blank" rel="noopener noreferrer"
+            className="text-accent underline-offset-2 hover:underline">source ↗</a>
+          {sources.slice(1).map((url, i) => (
+            <a key={url} href={url} target="_blank" rel="noopener noreferrer"
+              title="Another outlet reporting the same event"
+              className="font-[family-name:var(--font-mono-num)] text-dim hover:text-accent">
+              [{i + 2}]
+            </a>
+          ))}
+        </span>
         {event.co2Kg != null && (
           <span className="font-[family-name:var(--font-mono-num)] text-neg">
             +{formatCo2Kg(event.co2Kg)} CO2
@@ -27,8 +38,10 @@ export const ActionItem = ({ event }: { event: PersonDetail['events'][number] })
         )}
         {event.advocacyWeight != null && (
           <span className="font-[family-name:var(--font-mono-num)] text-pos"
-            title="Advocacy weight feeding the hypocrisy multiplier">
-            +{event.advocacyWeight} advocacy
+            title={isEcho
+              ? 'Repeat mention — down-weighted in the hypocrisy multiplier'
+              : 'Advocacy weight feeding the hypocrisy multiplier'}>
+            +{event.advocacyWeight} advocacy{isEcho ? ' · echo' : ''}
           </span>
         )}
       </div>

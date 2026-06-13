@@ -24,6 +24,15 @@ multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ weight × 0.5^(ageDay
         ))}
       </tbody>
     </table>
+    <h2 className="mt-8 text-lg font-medium">Counting each act once</h2>
+    <p className="mt-2 text-dim">
+      One announcement is reported by dozens of outlets, in many languages. Articles describing the
+      same act by the same person within {CONFIG.score.dedup.sameEventWindowDays} days are merged into
+      a single entry with every source linked — counted once, never inflated by coverage volume.
+      A genuine later re-statement of the same act (within {CONFIG.score.dedup.echoWindowDays} days)
+      still counts, but is down-weighted to {CONFIG.score.dedup.echoWeightFactor}× so repetition alone
+      can&apos;t move a ranking. The same rules apply to every person on the list.
+    </p>
     <h2 className="mt-8 text-lg font-medium">Emission factors (kg CO2 per km)</h2>
     <table className="mt-2 w-full text-left text-xs">
       <tbody>
