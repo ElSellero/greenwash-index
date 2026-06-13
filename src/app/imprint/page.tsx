@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 const ImprintPage = () => (
-  <main className="mx-auto max-w-3xl px-4 py-10 text-sm leading-6">
+  <main className="mx-auto max-w-3xl px-4 pb-14 pt-14 text-sm leading-6 sm:px-6 lg:px-8">
     <h1 className="text-2xl font-semibold">Imprint</h1>
     <h2 className="mt-6 text-lg font-medium">Information pursuant to § 5 DDG</h2>
     <ImprintDetails />
