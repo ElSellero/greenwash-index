@@ -53,6 +53,19 @@ const PrivacyPage = () => (
       </p>
     )}
 
+    <h2 className="mt-8 text-lg font-medium">Personal data of featured public figures</h2>
+    <p className="mt-2 text-dim">
+      This site processes publicly available information about public figures (names, publicly
+      broadcast vehicle positions, and sourced news events) for a satirical, journalistic-editorial
+      purpose. This processing relies on the media privilege (Art. 85 GDPR in conjunction with the
+      applicable German press/media law) and our legitimate interest in public-interest reporting
+      (Art. 6(1)(f) GDPR). Every claim links to its source. Featured persons may request
+      rectification or removal of any event whose source does not support it — see the{' '}
+      <a href="/methodology" className="text-accent hover:underline">methodology</a> and the
+      contact in the <a href="/imprint" className="text-accent hover:underline">imprint</a>;
+      substantiated requests are honored promptly.
+    </p>
+
     <h2 className="mt-8 text-lg font-medium">Your rights (GDPR Art. 15–21)</h2>
     <p className="mt-2 text-dim">
       You have the right to access, rectification, erasure, restriction of processing, data
