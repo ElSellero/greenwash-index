@@ -66,6 +66,7 @@ export const getCurrentPositions = async () => {
       trackingMode: vehicles.trackingMode,
       lat: positions.lat,
       lng: positions.lng,
+      heading: positions.heading,
       isMoving: positions.isMoving,
       source: positions.source,
       recordedAt: positions.recordedAt,
