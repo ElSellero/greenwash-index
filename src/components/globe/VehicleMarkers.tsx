@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
-import { Group, SpriteMaterial, SRGBColorSpace, type Texture, TextureLoader } from 'three';
+import { Group, LinearFilter, SpriteMaterial, SRGBColorSpace, type Texture, TextureLoader } from 'three';
 import { latLngToVector3 } from '@/lib/geo';
 import { useAppStore } from '@/lib/store';
 import { CONFIG } from '@/config';
@@ -47,8 +47,11 @@ const Marker = ({ pos, texture }: { pos: Pos; texture: Texture }) => {
           ref={material}
           map={texture}
           map-colorSpace={SRGBColorSpace}
+          map-minFilter={LinearFilter}
+          map-generateMipmaps={false}
           color={isSelected ? '#ffffff' : color}
           depthWrite={false}
+          toneMapped={false}
         />
       </sprite>
       {pos.isMoving && (
