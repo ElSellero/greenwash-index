@@ -31,7 +31,14 @@ const Marker = ({ pos, texture }: { pos: Pos; texture: Texture }) => {
     const base = Math.min(1.8, Math.max(0.7, dist / 2.6));
     group.current.scale.setScalar(isSelected ? base * 1.5 : base);
     if (material.current && pos.heading != null) {
-      material.current.rotation = -pos.heading * DEG2RAD;
+      if (pos.type === 'yacht') {
+        // boats stay upright and only lean toward travel, capped at ±30°
+        const signed = ((pos.heading + 180) % 360) - 180;
+        const lean = Math.max(-30, Math.min(30, signed));
+        material.current.rotation = -lean * DEG2RAD;
+      } else {
+        material.current.rotation = -pos.heading * DEG2RAD;
+      }
     }
   });
 
