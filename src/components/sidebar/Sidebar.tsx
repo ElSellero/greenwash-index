@@ -26,11 +26,11 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
         transition-[height] duration-300 md:inset-y-0 md:left-0 md:right-auto md:h-full md:w-80 md:rounded-none md:border-y-0 md:border-l-0
         ${expanded ? 'h-[70dvh]' : 'h-36'} md:h-full`}
     >
-      <button className="cursor-pointer py-2 md:hidden" aria-label="Toggle leaderboard"
+      <button className="cursor-pointer py-3 md:hidden" aria-label="Toggle leaderboard"
         onClick={() => setExpanded((v) => !v)}>
         <span className="mx-auto block h-1 w-10 rounded bg-panel-edge" />
       </button>
-      <div className="px-3 pb-2">
+      <div className="px-4 pb-3 md:pt-5">
         <h1 className="text-xs font-semibold uppercase tracking-[0.2em] text-dim">
           Greenwash Index
         </h1>
@@ -38,13 +38,13 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search persons of interest…"
-          className="mt-2 w-full rounded border border-panel-edge bg-abyss px-2 py-1.5 text-sm
+          className="mt-3 w-full rounded border border-panel-edge bg-abyss px-3 py-2 text-sm
             placeholder:text-dim focus:border-accent focus:outline-none"
         />
       </div>
-      <ul className="min-h-0 flex-1 overflow-y-auto">
+      <ul className="min-h-0 flex-1 overflow-y-auto pb-2">
         {filtered.map((e) => <LeaderboardRow key={e.personId} entry={e} />)}
-        <li className="p-2"><AdSlot slot="sidebar-bottom" /></li>
+        <li className="p-3"><AdSlot slot="sidebar-bottom" /></li>
       </ul>
     </aside>
   );

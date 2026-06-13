@@ -18,7 +18,7 @@ export const InfoPopup = ({ entries, positions }: {
     ?? positions.find((p) => p.personId === selectedPersonId);
 
   return (
-    <div className="absolute right-4 top-4 z-20 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-panel-edge bg-panel/95 p-4 shadow-2xl backdrop-blur">
+    <div className="absolute right-4 top-14 z-20 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-panel-edge bg-panel/95 p-4 shadow-2xl backdrop-blur">
       <button onClick={() => select(null)} aria-label="Close"
         className="absolute right-3 top-2 cursor-pointer text-dim hover:text-white">✕</button>
       <p className="text-[10px] uppercase tracking-[0.2em] text-dim">Rank #{entry.rank}</p>

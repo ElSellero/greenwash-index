@@ -6,6 +6,7 @@ import { Earth } from './Earth';
 import { VehicleMarkers } from './VehicleMarkers';
 import { RouteArcs } from './RouteArcs';
 import { CameraRig } from './CameraRig';
+import { useAppStore } from '@/lib/store';
 import type { PositionsPayload } from '@/lib/api-types';
 
 export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
@@ -13,6 +14,7 @@ export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
   const [dpr, setDpr] = useState(() =>
     typeof window === 'undefined' ? 1.5 : Math.min(2, window.devicePixelRatio));
   const [segments, setSegments] = useState(96);
+  const hasSelection = useAppStore((s) => s.selectedPersonId !== null);
   const reducedMotion = useMemo(
     () => typeof window !== 'undefined'
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -47,7 +49,7 @@ export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
         maxDistance={4}
         rotateSpeed={0.5}
         zoomSpeed={0.6}
-        autoRotate={!reducedMotion}
+        autoRotate={!reducedMotion && !hasSelection}
         autoRotateSpeed={0.25}
       />
     </Canvas>

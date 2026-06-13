@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Fira_Sans, Fira_Code } from 'next/font/google';
 import { ConsentLoader } from '@/components/ui/ConsentLoader';
+import { DonationBanner } from '@/components/ui/DonationBanner';
 import './globals.css';
 
 const firaSans = Fira_Sans({
@@ -20,8 +21,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="en" className={`${firaSans.variable} ${firaCode.variable}`}>
     <body className="antialiased">
       <ConsentLoader />
+      <DonationBanner />
       {children}
-      <footer className="pointer-events-auto fixed bottom-1 right-2 z-30 text-[10px] text-dim">
+      <footer className="pointer-events-auto fixed bottom-2 right-3 z-30 text-[10px] text-dim">
         <a href="/methodology" className="hover:text-accent">methodology</a> ·{' '}
         <a href="/imprint" className="hover:text-accent">imprint</a> ·{' '}
         <a href="/privacy" className="hover:text-accent">privacy</a>

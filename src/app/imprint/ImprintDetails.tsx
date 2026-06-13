@@ -1,13 +1,10 @@
 'use client';
-import { useSyncExternalStore } from 'react';
+import { useHydrated } from '@/lib/useHydrated';
 
 const NAME = process.env.NEXT_PUBLIC_IMPRINT_NAME;
 const STREET = process.env.NEXT_PUBLIC_IMPRINT_STREET;
 const CITY = process.env.NEXT_PUBLIC_IMPRINT_CITY;
 const EMAIL = process.env.NEXT_PUBLIC_IMPRINT_EMAIL;
-
-const emptySubscribe = () => () => {};
-const useHydrated = () => useSyncExternalStore(emptySubscribe, () => true, () => false);
 
 export const ImprintDetails = () => {
   const show = useHydrated();
