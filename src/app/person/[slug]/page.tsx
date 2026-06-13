@@ -15,7 +15,7 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
   const { person, snapshot, events, vehicles } = detail;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <main className="mx-auto max-w-5xl px-4 pb-12 pt-14 sm:px-6 lg:px-8">
       <Link href="/" className="text-sm text-dim hover:text-accent">← back to the globe</Link>
       <header className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>

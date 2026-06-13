@@ -2,7 +2,7 @@ import { CONFIG } from '@/config';
 import { JET_MODEL_KG_PER_KM } from '@/lib/score/co2';
 
 const MethodologyPage = () => (
-  <main className="mx-auto max-w-3xl px-4 py-10 text-sm leading-6">
+  <main className="mx-auto max-w-3xl px-4 pb-14 pt-14 text-sm leading-6 sm:px-6 lg:px-8">
     <h1 className="text-2xl font-semibold">Methodology</h1>
     <p className="mt-3 text-dim">
       The Greenwash Index is a satirical, editorial data project. Every ranking is an opinion

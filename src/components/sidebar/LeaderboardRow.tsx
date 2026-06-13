@@ -18,7 +18,7 @@ export const LeaderboardRow = ({ entry }: { entry: LeaderboardEntry }) => {
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(entry.personId); }
         }}
-        className={`flex w-full cursor-pointer items-center gap-3 border-l-2 px-3 py-2 text-left transition
+        className={`flex min-h-11 w-full cursor-pointer items-center gap-3 border-l-2 px-4 py-2.5 text-left transition
           focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent
           ${isSelected ? 'border-accent bg-panel-edge/40' : 'border-transparent hover:bg-panel-edge/20'}`}
       >
