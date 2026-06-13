@@ -47,6 +47,8 @@ export const classifyArticle = async (
         schema: classificationSchema,
         system: SYSTEM,
         prompt: `Person: ${personName}\nHeadline: ${article.title}\nPublished: ${article.publishedAt.toISOString()}`,
+        // turn a hung network call into a retryable error so the loop never stalls
+        abortSignal: AbortSignal.timeout(60_000),
       }),
     );
     return object;
