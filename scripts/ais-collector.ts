@@ -30,6 +30,12 @@ const flush = async () => {
     if (!obs) continue;
     latest.delete(mmsi);
     try {
+      // first real contact: stop simulating this yacht so sim and AIS trips don't mix
+      if (v.trackingMode !== 'live') {
+        await db.update(vehicles).set({ trackingMode: 'live' }).where(eq(vehicles.id, v.id));
+        v.trackingMode = 'live';
+        console.log(`  promoted ${v.name} to live (first AIS contact)`);
+      }
       await recordObservation(v, obs, 'ais', now);
       console.log(`  flush ${v.name} @ ${obs.lat.toFixed(3)},${obs.lng.toFixed(3)} moving=${obs.isMoving}`);
     } catch (e) {
