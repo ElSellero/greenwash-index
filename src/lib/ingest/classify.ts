@@ -63,12 +63,8 @@ Examples:
 /** A classification plus the provenance label of the model that produced it. */
 export type ClassifiedResult = Classification & { classifier: string };
 
-export const classifyArticle = async (
-  personName: string,
-  article: Article,
-): Promise<ClassifiedResult | null> => {
-  const prompt = `Person: ${personName}\nHeadline: ${article.title}\nPublished: ${article.publishedAt.toISOString()}`;
-  // cloud tiers first (Gemini 3.5 → 3.1-lite), then local Ollama as last resort
+const buildAttempts = (prompt: string, geminiOnly: boolean): Attempt<Classification>[] => {
+  // cloud tiers first (Gemini 3.5 → 3.1-lite)
   const attempts: Attempt<Classification>[] = classifierChain().map(({ label, model }) => ({
     label,
     run: async () => (await generateObject({
@@ -80,17 +76,38 @@ export const classifyArticle = async (
       abortSignal: AbortSignal.timeout(60_000),
     })).object,
   }));
-  if (isOllama()) {
+  // local Ollama as last resort — but re-verification deliberately skips it
+  if (!geminiOnly && isOllama()) {
     attempts.push({ label: ollamaLabel(), run: () => ollamaGenerateObject(classificationSchema, SYSTEM, prompt) });
   }
+  return attempts;
+};
+
+/**
+ * Classify a single prompt through the fallback chain. `geminiOnly` skips the
+ * local Ollama tier — used by re-verification, which must upgrade Ollama-classified
+ * rows with a cloud model, never re-confirm them with the same weak local one.
+ */
+export const runClassification = async (
+  prompt: string,
+  geminiOnly = false,
+): Promise<ClassifiedResult | null> => {
   try {
-    const { value, label } = await runWithFallback(attempts);
+    const { value, label } = await runWithFallback(buildAttempts(prompt, geminiOnly));
     // local models overrun [0,1]; clamp so the guardrail and ticker stay sane
     return { ...value, confidence: Math.min(1, Math.max(0, value.confidence)), classifier: label };
   } catch {
     return null;
   }
 };
+
+export const classifyArticle = (
+  personName: string,
+  article: Article,
+): Promise<ClassifiedResult | null> =>
+  runClassification(
+    `Person: ${personName}\nHeadline: ${article.title}\nPublished: ${article.publishedAt.toISOString()}`,
+  );
 
 export const advocacyWeightFor = (type: Classification['type']): number =>
   CONFIG.score.advocacyWeights[type as keyof typeof CONFIG.score.advocacyWeights] ?? 1;
