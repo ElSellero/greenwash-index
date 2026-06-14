@@ -28,6 +28,7 @@ const run = async () => {
           model, // chain falls back to a stabler model if the primary is overloaded
           schema,
           prompt: `Find the publicly documented aircraft registration (tail number) and ICAO24 hex code for the ${jet.name} associated with ${jet.personName}. Only report values documented in public sources (FAA registry, planespotters.net, news articles about celebrity jet tracking). Provide the URL of the best source as verificationUrl. If ownership is not publicly documented or was sold, return found=false.`,
+          abortSignal: AbortSignal.timeout(60_000), // never hang on a stalled network call
         }),
       ));
     } catch (err) {
