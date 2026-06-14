@@ -3,9 +3,12 @@ import Link from 'next/link';
 import type { LeaderboardEntry } from '@/lib/api-types';
 import { Co2Ticker } from '@/components/ui/Co2Ticker';
 import { FavoriteButton } from '@/components/ui/FavoriteButton';
+import { formatCo2Kg } from '@/lib/format';
 import { useAppStore } from '@/lib/store';
 
-export const LeaderboardRow = ({ entry }: { entry: LeaderboardEntry }) => {
+export const LeaderboardRow = (
+  { entry, rank, mode }: { entry: LeaderboardEntry; rank: number; mode: '12m' | 'all' },
+) => {
   const select = useAppStore((s) => s.select);
   const isSelected = useAppStore((s) => s.selectedPersonId === entry.personId);
   return (
@@ -23,14 +26,20 @@ export const LeaderboardRow = ({ entry }: { entry: LeaderboardEntry }) => {
           ${isSelected ? 'border-accent bg-panel-edge/40' : 'border-transparent hover:bg-panel-edge/20'}`}
       >
         <span className="w-7 shrink-0 font-[family-name:var(--font-mono-num)] text-xs text-dim">
-          #{entry.rank}
+          #{rank}
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{entry.name}</span>
           <span className="block text-[11px] text-dim">
             ×{entry.multiplier.toFixed(1)} hypocrisy ·{' '}
-            <Co2Ticker baseKg={entry.co2Kg12m} ratePerSec={entry.co2RatePerSec}
-              snapshotAt={entry.snapshotDate} className="text-neg" /> / yr
+            {mode === 'all' ? (
+              <span className="text-neg">{formatCo2Kg(entry.co2KgTotal)} total</span>
+            ) : (
+              <>
+                <Co2Ticker baseKg={entry.co2Kg12m} ratePerSec={entry.co2RatePerSec}
+                  snapshotAt={entry.snapshotDate} className="text-neg" /> / yr
+              </>
+            )}
           </span>
         </span>
         <FavoriteButton personId={entry.personId} />

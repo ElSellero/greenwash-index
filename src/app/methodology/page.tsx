@@ -24,6 +24,11 @@ multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ weight × 0.5^(ageDay
         ))}
       </tbody>
     </table>
+    <p className="mt-3 text-dim">
+      The leaderboard offers two windows: <b>Last 12 months</b> (the rolling score above,
+      what they&apos;re emitting now) and <b>All-time</b> (lifetime documented CO2 × multiplier,
+      including historical figures from cited reports). Toggle them in the sidebar.
+    </p>
     <h2 className="mt-8 text-lg font-medium">Counting each act once</h2>
     <p className="mt-2 text-dim">
       One announcement is reported by dozens of outlets, in many languages. Articles describing the
