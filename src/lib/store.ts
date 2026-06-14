@@ -10,6 +10,8 @@ type SelectionState = {
   toggleFavorite: (personId: number) => void;
   search: string;
   setSearch: (q: string) => void;
+  rankMode: '12m' | 'all'; // leaderboard window: rolling 12 months vs all-time
+  setRankMode: (m: '12m' | 'all') => void;
 };
 
 export const useAppStore = create<SelectionState>()(
@@ -28,6 +30,8 @@ export const useAppStore = create<SelectionState>()(
         }),
       search: '',
       setSearch: (q) => set({ search: q }),
+      rankMode: '12m',
+      setRankMode: (m) => set({ rankMode: m }),
     }),
     {
       name: 'greenwash-index', // localStorage key — functional only, no consent needed
