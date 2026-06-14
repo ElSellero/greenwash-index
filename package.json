@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx scripts/seed.ts",
-    "backfill": "tsx scripts/backfill.ts"
+    "backfill": "tsx scripts/backfill.ts",
+    "reverify": "tsx scripts/reverify.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.81",
