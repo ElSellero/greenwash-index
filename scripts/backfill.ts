@@ -37,8 +37,11 @@ const processArticle = async (p: { id: number; name: string }, article: Article)
     .where(eq(seenArticles.urlHash, hash)).limit(1);
   if (seen.length > 0) return; // already processed in an earlier run
   const c = await classifyArticle(p.name, article);
-  const delay = interCallDelayMs();
-  if (delay) await new Promise((r) => setTimeout(r, delay));
+  // local Ollama has no rate limit; only pace cloud (Gemini) calls
+  if (!c?.classifier?.startsWith('ollama')) {
+    const delay = interCallDelayMs();
+    if (delay) await new Promise((r) => setTimeout(r, delay));
+  }
   if (!c) return; // LLM error / rate limit — stays unseen, next run retries
   await db.insert(seenArticles).values({ urlHash: hash }).onConflictDoNothing();
   if (!passesGuardrails(c, article.url)) return;

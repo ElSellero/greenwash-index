@@ -41,6 +41,7 @@ export const events = pgTable('events', {
   weightFactor: real('weight_factor').notNull().default(1), // <1 = echo/repeat of a prior act
   confidence: real('confidence'), // LLM confidence, null = human-entered
   autoClassified: boolean('auto_classified').notNull().default(false),
+  classifier: text('classifier'), // which model classified it (e.g. 'gemini-3.5-flash', 'ollama:gemma4'); 'ollama:*' = pending re-verification by Gemini
   reviewed: boolean('reviewed').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (t) => [
