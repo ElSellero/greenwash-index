@@ -70,46 +70,13 @@ const recordObservation = async (
   }
 };
 
-/** Live tick: refresh positions for the current top N. */
-export const runLiveIngest = async (now = new Date()) => {
-  const topIds = await getTopNPersonIds(CONFIG.live.topN);
-  const vehicleRows = await getVehiclesForPersons(topIds);
-  const liveJets = vehicleRows.filter((v) => v.trackingMode === 'live' && v.icao24);
-  const simulated = vehicleRows.filter((v) => v.trackingMode === 'simulated');
-
-  const states = await fetchJetStates(liveJets.map((v) => v.icao24!));
-  for (const jet of liveJets) {
-    const s = states.get(jet.icao24!);
-    if (!s) continue; // no signal → keep last known position (graceful degradation)
-    await recordObservation(jet, { ...s, lng: s.lng, isMoving: s.isAirborne }, 'adsb', now);
-  }
-  for (const v of simulated) {
-    const p = v.type === 'yacht'
-      ? yachtPositionAt(v.id, now)
-      : { ...yachtPositionAt(v.id + 100_000, now), isMoving: false }; // unverified jets: parked, no fake flights
-    await recordObservation(v, { lat: p.lat, lng: p.lng, isMoving: v.type === 'yacht' && p.isMoving, heading: p.heading, altitudeM: null }, 'sim', now);
-  }
-  return { liveJets: liveJets.length, simulated: simulated.length };
-};
-
-/** Daily run: positions for EVERYONE + recompute all scores. */
-export const runDailyPipeline = async (now = new Date()) => {
+/**
+ * Re-aggregate every person's score snapshot for today from current events.
+ * Idempotent: replaces today's rows, so it can run frequently (live tick) without
+ * piling up duplicate snapshots. Cheap — pure DB aggregation, no external calls.
+ */
+export const recomputeScores = async (now = new Date()): Promise<number> => {
   const allPersons = await db.select().from(persons);
-  const allVehicles = await db.select().from(vehicles);
-
-  // 1) position tick for all vehicles (live jets via ADS-B, rest simulated)
-  const liveJets = allVehicles.filter((v) => v.trackingMode === 'live' && v.icao24);
-  const states = await fetchJetStates(liveJets.map((v) => v.icao24!));
-  for (const jet of liveJets) {
-    const s = states.get(jet.icao24!);
-    if (s) await recordObservation(jet, { ...s, isMoving: s.isAirborne }, 'adsb', now);
-  }
-  for (const v of allVehicles.filter((x) => x.trackingMode === 'simulated')) {
-    const p = yachtPositionAt(v.id, now);
-    await recordObservation(v, { lat: p.lat, lng: p.lng, isMoving: v.type === 'yacht' && p.isMoving, heading: p.heading, altitudeM: null }, 'sim', now);
-  }
-
-  // 2) score snapshot per person
   const windowStart = new Date(now.getTime() - CONFIG.co2.windowDays * 86_400_000);
   const dayStart = new Date(now.getTime() - 86_400_000);
   const scored = [] as { personId: number; co2Kg12m: number; co2KgTotal: number; multiplier: number; score: number; co2RatePerSec: number }[];
@@ -138,8 +105,54 @@ export const runDailyPipeline = async (now = new Date()) => {
   }
   const ranked = rankPersons(scored);
   const today = now.toISOString().slice(0, 10);
+  // replace today's snapshots so frequent recomputes don't accumulate duplicate rows
+  await db.delete(scoreSnapshots).where(eq(scoreSnapshots.snapshotDate, today));
   for (const r of ranked) {
     await db.insert(scoreSnapshots).values({ ...r, snapshotDate: today });
   }
-  return { persons: ranked.length };
+  return ranked.length;
+};
+
+/** Live tick: refresh positions for the current top N, then re-aggregate scores. */
+export const runLiveIngest = async (now = new Date()) => {
+  const topIds = await getTopNPersonIds(CONFIG.live.topN);
+  const vehicleRows = await getVehiclesForPersons(topIds);
+  const liveJets = vehicleRows.filter((v) => v.trackingMode === 'live' && v.icao24);
+  const simulated = vehicleRows.filter((v) => v.trackingMode === 'simulated');
+
+  const states = await fetchJetStates(liveJets.map((v) => v.icao24!));
+  for (const jet of liveJets) {
+    const s = states.get(jet.icao24!);
+    if (!s) continue; // no signal → keep last known position (graceful degradation)
+    await recordObservation(jet, { ...s, lng: s.lng, isMoving: s.isAirborne }, 'adsb', now);
+  }
+  for (const v of simulated) {
+    const p = v.type === 'yacht'
+      ? yachtPositionAt(v.id, now)
+      : { ...yachtPositionAt(v.id + 100_000, now), isMoving: false }; // unverified jets: parked, no fake flights
+    await recordObservation(v, { lat: p.lat, lng: p.lng, isMoving: v.type === 'yacht' && p.isMoving, heading: p.heading, altitudeM: null }, 'sim', now);
+  }
+  // keep the leaderboard fresh between daily runs (reflects the growing backfill)
+  const scored = await recomputeScores(now);
+  return { liveJets: liveJets.length, simulated: simulated.length, scored };
+};
+
+/** Daily run: positions for EVERYONE + recompute all scores. */
+export const runDailyPipeline = async (now = new Date()) => {
+  const allVehicles = await db.select().from(vehicles);
+
+  // 1) position tick for all vehicles (live jets via ADS-B, rest simulated)
+  const liveJets = allVehicles.filter((v) => v.trackingMode === 'live' && v.icao24);
+  const states = await fetchJetStates(liveJets.map((v) => v.icao24!));
+  for (const jet of liveJets) {
+    const s = states.get(jet.icao24!);
+    if (s) await recordObservation(jet, { ...s, isMoving: s.isAirborne }, 'adsb', now);
+  }
+  for (const v of allVehicles.filter((x) => x.trackingMode === 'simulated')) {
+    const p = yachtPositionAt(v.id, now);
+    await recordObservation(v, { lat: p.lat, lng: p.lng, isMoving: v.type === 'yacht' && p.isMoving, heading: p.heading, altitudeM: null }, 'sim', now);
+  }
+
+  // 2) re-aggregate all score snapshots from current events
+  return { persons: await recomputeScores(now) };
 };
