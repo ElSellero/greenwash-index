@@ -5,20 +5,35 @@ import { LeaderboardRow } from './LeaderboardRow';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useAppStore } from '@/lib/store';
 
+// all-time hypocrisy score = lifetime CO2 (tonnes) × advocacy multiplier
+const allTimeScore = (e: LeaderboardEntry) => (e.co2KgTotal / 1000) * e.multiplier;
+
 export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
   const search = useAppStore((s) => s.search);
   const setSearch = useAppStore((s) => s.setSearch);
   const favorites = useAppStore((s) => s.favorites);
+  const rankMode = useAppStore((s) => s.rankMode);
+  const setRankMode = useAppStore((s) => s.setRankMode);
   const [expanded, setExpanded] = useState(false); // mobile sheet state
+
+  // stable rank per mode, independent of search/favorites reordering
+  const rankByMode = useMemo(() => {
+    const sorted = [...entries].sort((a, b) => allTimeScore(b) - allTimeScore(a));
+    const allRank = new Map<number, number>();
+    sorted.forEach((e, i) => allRank.set(e.personId, i + 1));
+    return allRank;
+  }, [entries]);
+  const rankOf = (e: LeaderboardEntry) => (rankMode === 'all' ? rankByMode.get(e.personId) ?? e.rank : e.rank);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const matched = q ? entries.filter((e) => e.name.toLowerCase().includes(q)) : entries;
     return [...matched].sort((a, b) => {
       const favDelta = Number(favorites.includes(b.personId)) - Number(favorites.includes(a.personId));
-      return favDelta !== 0 ? favDelta : a.rank - b.rank;
+      if (favDelta !== 0) return favDelta;
+      return rankMode === 'all' ? allTimeScore(b) - allTimeScore(a) : a.rank - b.rank;
     });
-  }, [entries, search, favorites]);
+  }, [entries, search, favorites, rankMode]);
 
   return (
     <aside
@@ -41,9 +56,20 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
           className="mt-3 w-full rounded border border-panel-edge bg-abyss px-3 py-2 text-sm
             placeholder:text-dim focus:border-accent focus:outline-none"
         />
+        <div className="mt-3 flex rounded border border-panel-edge p-0.5 text-[11px]" role="tablist"
+          aria-label="Ranking window">
+          {([['12m', 'Last 12 months'], ['all', 'All-time']] as const).map(([mode, label]) => (
+            <button key={mode} role="tab" aria-selected={rankMode === mode}
+              onClick={() => setRankMode(mode)}
+              className={`flex-1 cursor-pointer rounded px-2 py-1 transition ${
+                rankMode === mode ? 'bg-accent/15 text-accent' : 'text-dim hover:text-white'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto pb-2">
-        {filtered.map((e) => <LeaderboardRow key={e.personId} entry={e} />)}
+        {filtered.map((e) => <LeaderboardRow key={e.personId} entry={e} rank={rankOf(e)} mode={rankMode} />)}
         <li className="p-3"><AdSlot slot="sidebar-bottom" /></li>
       </ul>
     </aside>
