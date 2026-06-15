@@ -67,6 +67,11 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
             </button>
           ))}
         </div>
+        <nav className="mt-2 text-[10px] text-dim md:hidden">
+          <a href="/methodology" className="hover:text-accent">methodology</a> ·{' '}
+          <a href="/imprint" className="hover:text-accent">imprint</a> ·{' '}
+          <a href="/privacy" className="hover:text-accent">privacy</a>
+        </nav>
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto pb-2">
         {filtered.map((e) => <LeaderboardRow key={e.personId} entry={e} rank={rankOf(e)} mode={rankMode} />)}
