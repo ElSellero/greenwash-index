@@ -13,7 +13,9 @@
     "db:seed": "tsx scripts/seed.ts",
     "backfill": "tsx scripts/backfill.ts",
     "reverify": "tsx scripts/reverify.ts",
-    "seed:reports": "tsx scripts/seed-reports.ts"
+    "seed:reports": "tsx scripts/seed-reports.ts",
+    "seed:mmsi": "tsx scripts/seed-mmsi.ts",
+    "ais": "tsx scripts/ais-collector.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.81",

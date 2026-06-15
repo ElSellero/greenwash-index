@@ -11,10 +11,10 @@ import { CONFIG } from '@/config';
 
 type VehicleRow = typeof vehicles.$inferSelect;
 
-const recordObservation = async (
+export const recordObservation = async (
   vehicle: VehicleRow,
   obs: { lat: number; lng: number; isMoving: boolean; heading: number | null; altitudeM: number | null },
-  source: 'adsb' | 'sim',
+  source: 'adsb' | 'sim' | 'ais',
   now: Date,
 ) => {
   await db.insert(positions).values({
@@ -58,10 +58,14 @@ const recordObservation = async (
         title: `${isJet ? 'Flight' : 'Yacht trip'} — ${Math.round(transition.totalKm)} km (${vehicle.name})`,
         description: source === 'sim'
           ? 'Simulated voyage (estimated, see methodology).'
-          : 'Tracked via public ADS-B data.',
+          : source === 'ais'
+            ? 'Tracked via public AIS data.'
+            : 'Tracked via public ADS-B data.',
         sourceUrl: source === 'adsb' && vehicle.icao24
           ? `https://globe.adsb.lol/?icao=${vehicle.icao24}`
-          : 'https://greenwash-index.example/methodology#simulated',
+          : source === 'ais' && vehicle.mmsi
+            ? `https://www.vesselfinder.com/?mmsi=${vehicle.mmsi}`
+            : 'https://greenwash-index.example/methodology#simulated',
         occurredAt: now,
         co2Kg,
         autoClassified: true,

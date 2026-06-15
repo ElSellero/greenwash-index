@@ -19,6 +19,7 @@ export const vehicles = pgTable('vehicles', {
   name: text('name').notNull(), // "Gulfstream G650ER" / "M/Y Koru"
   registration: text('registration'), // tail number or vessel name
   icao24: text('icao24'), // lowercase hex, jets only
+  mmsi: text('mmsi'), // AIS Maritime Mobile Service Identity, yachts only
   modelKey: text('model_key'), // key into JET_MODEL_KG_PER_KM
   co2KgPerKm: real('co2_kg_per_km').notNull(),
   trackingMode: text('tracking_mode').notNull(), // 'live' | 'simulated'
