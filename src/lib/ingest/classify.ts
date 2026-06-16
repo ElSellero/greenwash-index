@@ -51,6 +51,7 @@ POSITIVE (pro-climate acts):
 
 relevant=false for gossip, dating, fashion, awards, general business, or anything not in those categories.
 NEVER infer beyond the headline. Low information ⇒ low confidence. eventDate = the date only, YYYY-MM-DD.
+Write "title" and "summary" in concise ENGLISH, even when the source headline is in another language (translate it).
 
 Examples:
 "X's private jet took 170 flights this year" => relevant=true, negative, flight
