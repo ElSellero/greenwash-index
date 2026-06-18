@@ -23,6 +23,7 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
             {snapshot ? `Rank #${snapshot.rank}` : 'Unranked'} · {person.category}
           </p>
           <h1 className="text-3xl font-semibold">{person.name}</h1>
+          {person.bio && <p className="mt-1 max-w-prose text-sm text-slate-300">{person.bio}</p>}
           <p className="mt-1 text-sm text-dim">
             {vehicles.map((v) => v.name).join(' · ') || 'No tracked vehicles'}
           </p>
