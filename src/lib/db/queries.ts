@@ -37,7 +37,7 @@ export const getLeaderboard = async () => {
 export const getPersonDetail = async (slug: string) => {
   const person = await db.query.persons.findFirst({ where: eq(persons.slug, slug) });
   if (!person) return null;
-  const [personVehicles, personEvents, snapshot] = await Promise.all([
+  const [personVehicles, personEvents, snapshot, board] = await Promise.all([
     db.select().from(vehicles).where(eq(vehicles.personId, person.id)),
     db.select().from(events)
       .where(eq(events.personId, person.id))
@@ -45,8 +45,13 @@ export const getPersonDetail = async (slug: string) => {
     db.select().from(scoreSnapshots)
       .where(eq(scoreSnapshots.personId, person.id))
       .orderBy(desc(scoreSnapshots.snapshotDate)).limit(1),
+    getLeaderboard(),
   ]);
-  return { person, vehicles: personVehicles, events: personEvents, snapshot: snapshot[0] ?? null };
+  // all-time rank (lifetime CO2 × multiplier) — matches the leaderboard's default view
+  const allTimeRank = [...board]
+    .sort((a, b) => b.co2KgTotal * b.multiplier - a.co2KgTotal * a.multiplier)
+    .findIndex((e) => e.personId === person.id) + 1 || null;
+  return { person, vehicles: personVehicles, events: personEvents, snapshot: snapshot[0] ?? null, allTimeRank };
 };
 
 /** Latest position per vehicle + active trip, for the globe. */
