@@ -12,7 +12,7 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
   const { slug } = await params;
   const detail = await getPersonDetail(slug);
   if (!detail) notFound();
-  const { person, snapshot, events, vehicles } = detail;
+  const { person, snapshot, events, vehicles, allTimeRank } = detail;
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-12 pt-14 sm:px-6 lg:px-8">
@@ -20,7 +20,7 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
       <header className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-[0.2em] text-dim">
-            {snapshot ? `Rank #${snapshot.rank}` : 'Unranked'} · {person.category}
+            {allTimeRank ? `Rank #${allTimeRank} all-time` : 'Unranked'} · {person.category}
           </p>
           <h1 className="text-3xl font-semibold">{person.name}</h1>
           {person.bio && <p className="mt-1 max-w-prose text-sm text-slate-300">{person.bio}</p>}
@@ -30,7 +30,7 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
         </div>
         {snapshot && (
           <p className="text-right">
-            <span className="block text-[10px] uppercase tracking-[0.2em] text-dim">CO2 since snapshot, ticking</span>
+            <span className="block text-[10px] uppercase tracking-[0.2em] text-dim">Total documented CO2</span>
             <Co2Ticker baseKg={snapshot.co2KgTotal} ratePerSec={snapshot.co2RatePerSec}
               snapshotAt={snapshot.snapshotDate} className="text-2xl text-neg" />
           </p>

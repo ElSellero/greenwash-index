@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { LeaderboardEntry } from '@/lib/api-types';
 import { Co2Ticker } from '@/components/ui/Co2Ticker';
 import { FavoriteButton } from '@/components/ui/FavoriteButton';
-import { formatCo2Kg } from '@/lib/format';
+import { formatCo2Kg, formatScore } from '@/lib/format';
 import { useAppStore } from '@/lib/store';
 
 export const LeaderboardRow = (
@@ -11,6 +11,7 @@ export const LeaderboardRow = (
 ) => {
   const select = useAppStore((s) => s.select);
   const isSelected = useAppStore((s) => s.selectedPersonId === entry.personId);
+  const score = mode === 'all' ? (entry.co2KgTotal / 1000) * entry.multiplier : entry.score;
   return (
     <li>
       {/* div, not button: row contains nested interactive elements (favorite, profile link) */}
@@ -31,13 +32,15 @@ export const LeaderboardRow = (
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{entry.name}</span>
           <span className="block text-[11px] text-dim">
-            ×{entry.multiplier.toFixed(1)} hypocrisy ·{' '}
+            <span className="font-[family-name:var(--font-mono-num)] font-semibold tabular-nums text-white"
+              title="Hypocrisy score = CO2 tonnes × advocacy multiplier">{formatScore(score)}</span>
+            <span> · ×{entry.multiplier.toFixed(1)} · </span>
             {mode === 'all' ? (
-              <span className="text-neg">{formatCo2Kg(entry.co2KgTotal)} total</span>
+              <span className="text-neg">{formatCo2Kg(entry.co2KgTotal)}</span>
             ) : (
               <>
                 <Co2Ticker baseKg={entry.co2Kg12m} ratePerSec={entry.co2RatePerSec}
-                  snapshotAt={entry.snapshotDate} className="text-neg" /> / yr
+                  snapshotAt={entry.snapshotDate} className="text-neg" />/yr
               </>
             )}
           </span>
