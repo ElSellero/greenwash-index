@@ -30,7 +30,7 @@ export const useAppStore = create<SelectionState>()(
         }),
       search: '',
       setSearch: (q) => set({ search: q }),
-      rankMode: '12m',
+      rankMode: 'all', // default to all-time: differentiated scores (12m is mostly 0 until recent trips accrue)
       setRankMode: (m) => set({ rankMode: m }),
     }),
     {
