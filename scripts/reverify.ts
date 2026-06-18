@@ -11,8 +11,9 @@ import { interCallDelayMs } from '../src/lib/ingest/llm';
  *
  * - Gemini confirms it (passes guardrails) → UPDATE the row with Gemini's
  *   classification + provenance, mark reviewed. The weak-model guess is upgraded.
- * - Gemini rejects it (irrelevant / low confidence) → it was a false positive;
- *   DELETE the row so the index stays truthful.
+ * - Gemini rejects it (irrelevant / low confidence) → neutralize it (mark
+ *   classifier 'gemini-rejected', weight_factor 0) so it stops counting but is
+ *   kept for audit — non-destructive, safe for unattended runs.
  * - Gemini unavailable (quota/network) → skip; the row stays 'ollama:*' for a
  *   later run.
  *
@@ -56,8 +57,13 @@ const run = async () => {
     }
     if (!passesGuardrails(c, e.sourceUrl)) {
       rejected++;
-      console.log(`REJECT #${e.id} (Gemini: ${c.relevant ? 'low confidence' : 'not relevant'}) — ${e.title.slice(0, 55)}`);
-      if (apply) await db.delete(events).where(eq(events.id, e.id));
+      console.log(`REJECT #${e.id} (Gemini: ${c.relevant ? 'low confidence' : 'not relevant'}) — neutralized — ${e.title.slice(0, 50)}`);
+      // non-destructive: keep the row for audit but mark it rejected and drop its
+      // score weight, instead of deleting (safe for unattended runs, no data loss)
+      if (apply) {
+        await db.update(events).set({ classifier: 'gemini-rejected', weightFactor: 0, reviewed: true })
+          .where(eq(events.id, e.id));
+      }
       continue;
     }
     upgraded++;
