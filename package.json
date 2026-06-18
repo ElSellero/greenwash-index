@@ -19,7 +19,7 @@
     "ais": "tsx scripts/ais-collector.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.81",
+    "@ai-sdk/google": "^3.0.83",
     "@neondatabase/serverless": "^1.1.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
