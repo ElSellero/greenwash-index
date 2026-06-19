@@ -33,7 +33,7 @@ export const ScoreBreakdown = ({ snapshot }: { snapshot: NonNullable<PersonDetai
       </dl>
       <p className="mt-3 text-xs text-dim">
         Documented CO2 (tonnes) × advocacy multiplier (1–10, decaying over 24 months). A small
-        <b className="text-slate-300"> rhetoric floor</b> adds documented but unquantified high-emission acts
+        <b className="text-slate-300"> rhetoric floor </b> adds documented but unquantified high-emission acts
         (a reported jet, yacht or mansion), amplified by that multiplier — so green-talk-plus-untracked-exhaust
         isn&apos;t a flat zero. <b className="text-slate-300">Advocacy alone never scores</b>: a consistent climate
         advocate with no such act stays at zero. <b className="text-slate-300">All-time</b> counts every documented
