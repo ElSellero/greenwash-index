@@ -16,6 +16,15 @@ const FLUSH_MS = 5 * 60_000;
 const ENDPOINT = 'wss://stream.aisstream.io/v0/stream';
 const key = process.env.AISSTREAM_API_KEY;
 
+// One-shot sampling mode (run from a scheduled GitHub Actions cron instead of an
+// always-on host): connect, listen for AIS_SAMPLE_MS, flush once, then exit.
+// Coverage is sparse and yachts sit at anchor for days, so periodic sampling
+// loses ~nothing vs a 24/7 socket. Without --once the long-running mode (the
+// local supervisor fallback) is unchanged.
+const ONCE = process.argv.includes('--once') || process.env.AIS_ONCE === '1';
+const SAMPLE_MS = Number(process.env.AIS_SAMPLE_MS ?? 60_000);
+let shuttingDown = false;
+
 type Obs = { lat: number; lng: number; isMoving: boolean; heading: number | null; altitudeM: null };
 type Yacht = typeof vehicles.$inferSelect;
 
@@ -70,7 +79,11 @@ const connect = (mmsis: string[]) => {
     const heading = typeof pr.TrueHeading === 'number' && pr.TrueHeading < 511 ? pr.TrueHeading : (pr.Cog ?? null);
     latest.set(mmsi, { lat, lng, isMoving: (pr.Sog ?? 0) > 1, heading, altitudeM: null });
   });
-  ws.on('close', () => { console.log('ws closed — reconnecting in 5s'); setTimeout(() => connect(mmsis), 5_000); });
+  ws.on('close', () => {
+    if (shuttingDown) return; // intentional close at the end of a one-shot sample
+    console.log('ws closed — reconnecting in 5s');
+    setTimeout(() => connect(mmsis), 5_000);
+  });
   ws.on('error', (e: Error) => { console.log(`ws error: ${e.message}`); try { ws?.close(); } catch { /* noop */ } });
 };
 
@@ -81,8 +94,21 @@ const main = async () => {
   if (yachts.length === 0) { console.error('no yachts with an mmsi — populate vehicles.mmsi first'); process.exit(1); }
   byMmsi = new Map(yachts.map((v) => [String(v.mmsi), v]));
   console.log(`tracking ${yachts.length} yachts: ${yachts.map((v) => `${v.name}(${v.mmsi})`).join(', ')}`);
-  setInterval(() => { void flush(); }, FLUSH_MS);
   connect([...byMmsi.keys()]);
+  if (ONCE) {
+    // sample for one window, flush whatever was heard, then exit cleanly
+    setTimeout(() => {
+      void (async () => {
+        shuttingDown = true;
+        await flush();
+        try { ws?.close(); } catch { /* noop */ }
+        console.log(`one-shot sample done (${SAMPLE_MS}ms window)`);
+        process.exit(0);
+      })();
+    }, SAMPLE_MS);
+    return;
+  }
+  setInterval(() => { void flush(); }, FLUSH_MS);
 };
 
 main().catch((e) => { console.error('ais-collector aborted:', e); process.exit(1); });
