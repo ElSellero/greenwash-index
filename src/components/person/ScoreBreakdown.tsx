@@ -32,10 +32,12 @@ export const ScoreBreakdown = ({ snapshot }: { snapshot: NonNullable<PersonDetai
         </div>
       </dl>
       <p className="mt-3 text-xs text-dim">
-        Documented CO2 (tonnes) × advocacy multiplier (1–10, decaying over 24 months), plus a small
-        <b className="text-slate-300"> rhetoric floor</b> from what they say and documented (unquantified) acts — so
-        CO2 stays central but loud figures aren&apos;t flat zero. <b className="text-slate-300">All-time</b> counts
-        every documented tonne (incl. cited reports); <b className="text-slate-300">12-month</b> is the rolling window.
+        Documented CO2 (tonnes) × advocacy multiplier (1–10, decaying over 24 months). A small
+        <b className="text-slate-300"> rhetoric floor</b> adds documented but unquantified high-emission acts
+        (a reported jet, yacht or mansion), amplified by that multiplier — so green-talk-plus-untracked-exhaust
+        isn&apos;t a flat zero. <b className="text-slate-300">Advocacy alone never scores</b>: a consistent climate
+        advocate with no such act stays at zero. <b className="text-slate-300">All-time</b> counts every documented
+        tonne (incl. cited reports); <b className="text-slate-300">12-month</b> is the rolling window.
         <a href="/methodology" className="text-accent hover:underline"> Methodology</a>.
       </p>
     </div>

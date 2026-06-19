@@ -101,12 +101,13 @@ export const recomputeScores = async (now = new Date()): Promise<number> => {
     const m = advocacyMultiplier(
       // echo/repeat events carry weightFactor < 1 so repetition can't inflate the score
       advocacy.map((a) => ({ weight: (a.weight ?? 1) * (a.weightFactor ?? 1), occurredAt: a.occurredAt })), now);
-    // rhetoric floor: what they say (advocacy weights) + what they do (unquantified acts)
-    const stancePts: StanceEvent[] = [
-      ...advocacy.map((a) => ({ points: (a.weight ?? 1) * (a.weightFactor ?? 1), occurredAt: a.occurredAt })),
-      ...negUnquantified.map((e) => ({ points: CONFIG.score.negStanceUnit, occurredAt: e.occurredAt })),
-    ];
-    const stance = stanceScore(stancePts, now);
+    // rhetoric floor: ONLY documented "what they do" acts without a CO2 figure, amplified
+    // by the advocacy multiplier (talk × deeds). Positive advocacy alone never scores — a
+    // consistent climate advocate with no documented high-emission act stays at zero.
+    const stancePts: StanceEvent[] = negUnquantified.map((e) => ({
+      points: CONFIG.score.negStanceUnit, occurredAt: e.occurredAt,
+    }));
+    const stance = stanceScore(stancePts, m, now);
     const co2Kg12m = sums[0]?.kg12m ?? 0;
     scored.push({
       personId: p.id,

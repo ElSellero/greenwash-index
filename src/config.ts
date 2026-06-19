@@ -26,12 +26,13 @@ export const CONFIG = {
       preaching: 5,
     } as const,
     /**
-     * Rhetoric floor — lets "what they say" (advocacy) and documented-but-unquantified
-     * "what they do" (flight/yacht/asset news without a CO2 figure) add a SMALL additive
-     * score, so loud figures with no tracked CO2 aren't flat zero. Kept tiny + capped so
-     * real CO2 (tonnes × multiplier, often thousands) stays the dominant signal.
+     * Rhetoric floor — documented-but-unquantified "what they do" acts (flight/yacht/asset
+     * news without a CO2 figure) add a SMALL score, AMPLIFIED by the advocacy multiplier
+     * (green talk × dirty deeds). Positive advocacy alone never scores: no documented act
+     * ⇒ floor 0, so a consistent climate advocate stays at zero. Kept tiny + capped so real
+     * CO2 (tonnes × multiplier, often thousands) stays the dominant signal.
      */
-    stanceScale: 4, // points per decayed stance-unit
+    stanceScale: 1.5, // points per (decayed act-unit × multiplier)
     negStanceUnit: 1.5, // weight of one documented unquantified high-emission act ("what they do")
     stanceCap: 1500, // hard ceiling so rhetoric never rivals serious tracked emissions
     /** News-event de-duplication so one real act isn't counted many times. */
