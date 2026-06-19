@@ -11,7 +11,7 @@ export const LeaderboardRow = (
 ) => {
   const select = useAppStore((s) => s.select);
   const isSelected = useAppStore((s) => s.selectedPersonId === entry.personId);
-  const score = mode === 'all' ? (entry.co2KgTotal / 1000) * entry.multiplier : entry.score;
+  const score = mode === 'all' ? (entry.co2KgTotal / 1000) * entry.multiplier + entry.stanceScore : entry.score;
   return (
     <li>
       {/* div, not button: row contains nested interactive elements (favorite, profile link) */}

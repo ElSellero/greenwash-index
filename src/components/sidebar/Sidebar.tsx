@@ -5,8 +5,8 @@ import { LeaderboardRow } from './LeaderboardRow';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useAppStore } from '@/lib/store';
 
-// all-time hypocrisy score = lifetime CO2 (tonnes) × advocacy multiplier
-const allTimeScore = (e: LeaderboardEntry) => (e.co2KgTotal / 1000) * e.multiplier;
+// all-time hypocrisy score = lifetime CO2 (tonnes) × advocacy multiplier + rhetoric floor
+const allTimeScore = (e: LeaderboardEntry) => (e.co2KgTotal / 1000) * e.multiplier + e.stanceScore;
 
 export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
   const search = useAppStore((s) => s.search);
