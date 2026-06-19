@@ -20,6 +20,7 @@ export const getLeaderboard = async () => {
       co2Kg12m: scoreSnapshots.co2Kg12m,
       co2KgTotal: scoreSnapshots.co2KgTotal,
       multiplier: scoreSnapshots.multiplier,
+      stanceScore: scoreSnapshots.stanceScore,
       score: scoreSnapshots.score,
       rank: scoreSnapshots.rank,
       co2RatePerSec: scoreSnapshots.co2RatePerSec,
@@ -48,8 +49,10 @@ export const getPersonDetail = async (slug: string) => {
     getLeaderboard(),
   ]);
   // all-time rank (lifetime CO2 × multiplier) — matches the leaderboard's default view
+  const allTime = (e: { co2KgTotal: number; multiplier: number; stanceScore: number }) =>
+    (e.co2KgTotal / 1000) * e.multiplier + e.stanceScore;
   const allTimeRank = [...board]
-    .sort((a, b) => b.co2KgTotal * b.multiplier - a.co2KgTotal * a.multiplier)
+    .sort((a, b) => allTime(b) - allTime(a))
     .findIndex((e) => e.personId === person.id) + 1 || null;
   return { person, vehicles: personVehicles, events: personEvents, snapshot: snapshot[0] ?? null, allTimeRank };
 };
