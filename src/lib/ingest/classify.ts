@@ -50,6 +50,7 @@ POSITIVE (pro-climate acts):
 - preaching: publicly urged OTHERS to fly less / eat less meat / live greener.
 
 relevant=false for gossip, dating, fashion, awards, general business, or anything not in those categories.
+relevant=false if the headline is primarily about a DIFFERENT person than the one in the "Person:" field — only classify acts by that exact person, not someone merely mentioned alongside them.
 NEVER infer beyond the headline. Low information ⇒ low confidence. eventDate = the date only, YYYY-MM-DD.
 Write "title" and "summary" in concise ENGLISH, even when the source headline is in another language (translate it).
 

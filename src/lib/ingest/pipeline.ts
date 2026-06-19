@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { events, positions, scoreSnapshots, trips, vehicles, persons } from '@/lib/db/schema';
 import { getTopNPersonIds, getVehiclesForPersons } from '@/lib/db/queries';
@@ -6,7 +6,7 @@ import { fetchJetStates } from './adsb';
 import { nextTripState, type TripState } from './trips';
 import { yachtPositionAt } from './yachtSim';
 import { tripCo2Kg, co2RatePerSecond } from '@/lib/score/co2';
-import { advocacyMultiplier, hypocrisyScore, rankPersons } from '@/lib/score/hypocrisy';
+import { advocacyMultiplier, hypocrisyScore, rankPersons, stanceScore, type StanceEvent } from '@/lib/score/hypocrisy';
 import { CONFIG } from '@/config';
 
 type VehicleRow = typeof vehicles.$inferSelect;
@@ -83,7 +83,7 @@ export const recomputeScores = async (now = new Date()): Promise<number> => {
   const allPersons = await db.select().from(persons);
   const windowStart = new Date(now.getTime() - CONFIG.co2.windowDays * 86_400_000);
   const dayStart = new Date(now.getTime() - 86_400_000);
-  const scored = [] as { personId: number; co2Kg12m: number; co2KgTotal: number; multiplier: number; score: number; co2RatePerSec: number }[];
+  const scored = [] as { personId: number; co2Kg12m: number; co2KgTotal: number; multiplier: number; stanceScore: number; score: number; co2RatePerSec: number }[];
   for (const p of allPersons) {
     const sums = await db.select({
       kg12m: sql<number>`coalesce(sum(${events.co2Kg}) filter (where ${events.occurredAt} >= ${windowStart}), 0)`,
@@ -93,17 +93,28 @@ export const recomputeScores = async (now = new Date()): Promise<number> => {
     const advocacy = await db.select({
       weight: events.advocacyWeight, weightFactor: events.weightFactor, occurredAt: events.occurredAt,
     }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'positive')));
+    // documented "what they do" acts without a CO2 figure (news flights/yachts/assets)
+    const negUnquantified = await db.select({ occurredAt: events.occurredAt })
+      .from(events)
+      .where(and(eq(events.personId, p.id), eq(events.kind, 'negative'), isNull(events.co2Kg)));
 
     const m = advocacyMultiplier(
       // echo/repeat events carry weightFactor < 1 so repetition can't inflate the score
       advocacy.map((a) => ({ weight: (a.weight ?? 1) * (a.weightFactor ?? 1), occurredAt: a.occurredAt })), now);
+    // rhetoric floor: what they say (advocacy weights) + what they do (unquantified acts)
+    const stancePts: StanceEvent[] = [
+      ...advocacy.map((a) => ({ points: (a.weight ?? 1) * (a.weightFactor ?? 1), occurredAt: a.occurredAt })),
+      ...negUnquantified.map((e) => ({ points: CONFIG.score.negStanceUnit, occurredAt: e.occurredAt })),
+    ];
+    const stance = stanceScore(stancePts, now);
     const co2Kg12m = sums[0]?.kg12m ?? 0;
     scored.push({
       personId: p.id,
       co2Kg12m,
       co2KgTotal: sums[0]?.kgTotal ?? 0,
       multiplier: m,
-      score: hypocrisyScore(co2Kg12m / 1000, m),
+      stanceScore: stance,
+      score: hypocrisyScore(co2Kg12m / 1000, m) + stance,
       co2RatePerSec: co2RatePerSecond(sums[0]?.kg24h ?? 0),
     });
   }
