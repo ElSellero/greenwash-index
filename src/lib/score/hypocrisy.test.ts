@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { advocacyMultiplier, hypocrisyScore, rankPersons } from '@/lib/score/hypocrisy';
+import { advocacyMultiplier, hypocrisyScore, rankPersons, stanceScore } from '@/lib/score/hypocrisy';
 
 const NOW = new Date('2026-06-10T00:00:00Z');
 const daysAgo = (d: number) => new Date(NOW.getTime() - d * 86_400_000);
@@ -29,6 +29,24 @@ describe('hypocrisyScore', () => {
     );
     expect(preacher).toBeGreaterThan(silent);
     expect(silent).toBe(3000);
+  });
+});
+
+describe('stanceScore (rhetoric floor)', () => {
+  it('is 0 with no documented acts, however loud the advocacy', () => {
+    // a pure climate advocate (high multiplier, zero dirty deeds) is NOT a hypocrite
+    expect(stanceScore([], 10, NOW)).toBe(0);
+  });
+  it('scores documented unquantified acts, amplified by the multiplier', () => {
+    const quiet = stanceScore([{ points: 1.5, occurredAt: NOW }], 1, NOW);
+    const loud = stanceScore([{ points: 1.5, occurredAt: NOW }], 10, NOW);
+    expect(quiet).toBeGreaterThan(0);
+    expect(loud).toBeCloseTo(quiet * 10, 5); // talk × deeds
+  });
+  it('decays an act by half after one half-life', () => {
+    const fresh = stanceScore([{ points: 1.5, occurredAt: NOW }], 2, NOW);
+    const aged = stanceScore([{ points: 1.5, occurredAt: daysAgo(730) }], 2, NOW);
+    expect(aged).toBeCloseTo(fresh / 2, 5);
   });
 });
 
