@@ -21,18 +21,23 @@ export const hypocrisyScore = (co2Tons12m: number, multiplier: number): number =
 export type StanceEvent = { points: number; occurredAt: Date };
 
 /**
- * Small additive "rhetoric floor" from what they say (advocacy weights) and
- * what they do (documented unquantified high-emission acts). Time-decayed like
- * the multiplier and hard-capped so it never rivals real tracked CO2 — it just
- * keeps loud-but-untracked figures off a flat zero.
+ * "Rhetoric floor" for figures with documented high-emission ACTS we couldn't put
+ * a CO2 number on (a reported jet, yacht or mansion with no tonnage). Each such act
+ * is time-decayed, summed, then AMPLIFIED by the advocacy multiplier — green talk ×
+ * dirty deeds is the whole point of a hypocrisy index. Hard-capped so it never rivals
+ * real tracked CO2.
+ *
+ * Crucially it is driven ONLY by documented acts: positive advocacy never produces a
+ * floor on its own. A consistent climate advocate with no documented high-emission act
+ * has an empty `acts` list ⇒ score 0 — they're consistent, not a hypocrite.
  */
-export const stanceScore = (events: StanceEvent[], now: Date): number => {
+export const stanceScore = (acts: StanceEvent[], multiplier: number, now: Date): number => {
   const { halfLifeDays, stanceScale, stanceCap } = CONFIG.score;
-  const sum = events.reduce((acc, e) => {
+  const sum = acts.reduce((acc, e) => {
     const ageDays = Math.max(0, (now.getTime() - e.occurredAt.getTime()) / 86_400_000);
     return acc + e.points * Math.pow(0.5, ageDays / halfLifeDays);
   }, 0);
-  return Math.min(stanceCap, stanceScale * sum);
+  return Math.min(stanceCap, stanceScale * multiplier * sum);
 };
 
 export const rankPersons = <T extends { score: number }>(

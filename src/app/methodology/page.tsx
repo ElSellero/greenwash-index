@@ -12,7 +12,7 @@ const MethodologyPage = () => (
     <pre className="mt-2 rounded bg-panel p-3 font-[family-name:var(--font-mono-num)] text-xs">
 {`score      = co2Tons × multiplier + rhetoric
 multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ advocacyWeight × 0.5^(ageDays / ${CONFIG.score.halfLifeDays}))
-rhetoric   = min(${CONFIG.score.stanceCap}, ${CONFIG.score.stanceScale} × Σ stancePoints × 0.5^(ageDays / ${CONFIG.score.halfLifeDays}))`}
+rhetoric   = min(${CONFIG.score.stanceCap}, ${CONFIG.score.stanceScale} × multiplier × Σ unquantifiedActs × 0.5^(ageDays / ${CONFIG.score.halfLifeDays}))`}
     </pre>
     <table className="mt-4 w-full text-left text-xs">
       <thead><tr className="text-dim"><th className="py-1">Advocacy event</th><th>Weight</th></tr></thead>
@@ -26,12 +26,13 @@ rhetoric   = min(${CONFIG.score.stanceCap}, ${CONFIG.score.stanceScale} × Σ st
       </tbody>
     </table>
     <p className="mt-3 text-dim">
-      <b>Rhetoric floor:</b> CO2 is the core signal, but figures who talk a lot or have documented
-      high-emission habits we can&apos;t yet quantify shouldn&apos;t read as a flat zero. So a small,
-      capped term adds <i>stancePoints</i> — the advocacy weight of what they <b>say</b>, plus
-      {' '}{CONFIG.score.negStanceUnit} per documented but unquantified thing they <b>do</b>
-      (a reported flight, yacht or asset with no CO2 figure). It&apos;s deliberately tiny: real tracked
-      tonnes (× multiplier) dwarf it, but a vocal climate preacher with no tracked jet still scores above zero.
+      <b>Rhetoric floor:</b> hypocrisy needs the gap — green talk <i>and</i> dirty deeds. CO2 is the
+      core signal, but some figures have documented high-emission habits (a reported private jet,
+      yacht or mansion) we can&apos;t yet put a CO2 number on. A small, capped term counts each such
+      <i> unquantified act</i>, amplified by the same advocacy multiplier, so loud-talk-plus-untracked-exhaust
+      reads above zero. Crucially, <b>advocacy alone never scores</b>: someone who only champions the
+      climate and has no documented high-emission act stays at zero — they&apos;re consistent, not a
+      hypocrite. And it&apos;s deliberately tiny — real tracked tonnes (× multiplier) dwarf it.
     </p>
     <p className="mt-3 text-dim">
       The leaderboard offers two windows: <b>Last 12 months</b> (the rolling score above,
