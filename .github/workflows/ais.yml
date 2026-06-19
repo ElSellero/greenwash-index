@@ -1,0 +1,29 @@
+name: ais-sample
+on:
+  schedule:
+    # sample yacht AIS positions every 30 min. Yachts sit at anchor for days and
+    # only ~1/8 broadcast, so this loses ~nothing vs an always-on socket while
+    # costing nothing (public repo = free Actions minutes). Adjust freely.
+    # NOTE: scheduled runs only fire from the default branch (main).
+    - cron: '*/30 * * * *'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: ais-sample
+  cancel-in-progress: true
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - name: Sample AIS positions (one-shot)
+        run: npm run ais -- --once
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AISSTREAM_API_KEY: ${{ secrets.AISSTREAM_API_KEY }}
+          AIS_SAMPLE_MS: '60000'
