@@ -1,0 +1,14 @@
+# Fly.io config for the always-on AIS yacht collector.
+# A pure background worker: no [http_service]/[[services]] block, so the single
+# machine just runs 24/7 and Fly restarts it on crash (the old supervisor's job).
+# Secrets are NOT here — set them once with:
+#   fly secrets set DATABASE_URL="..." AISSTREAM_API_KEY="..."
+app = "greenwash-ais"
+primary_region = "fra"
+
+[build]
+  dockerfile = "ais.Dockerfile"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
