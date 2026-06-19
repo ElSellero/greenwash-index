@@ -1,0 +1,31 @@
+name: backfill
+on:
+  schedule:
+    # daily 10:00 UTC — after the 08:00 news scan, so the live pipelines get
+    # first dibs on the shared Gemini free-tier daily quota and backfill mops
+    # up whatever is left. Resumable across days via the seenArticles table.
+    # NOTE: scheduled runs only fire from the default branch (main).
+    - cron: '0 10 * * *'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  # never let two backfill passes race on the shared DB / Gemini quota
+  group: backfill
+  cancel-in-progress: false
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    # well under GitHub's 6h job cap; backfill is resumable, so a timeout kill
+    # is harmless — the next run skips already-seen articles before any LLM call.
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - name: Run historical backfill
+        run: npm run backfill
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}

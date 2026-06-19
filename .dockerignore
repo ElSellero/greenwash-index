@@ -1,0 +1,11 @@
+# Keep the build context small; node_modules is rebuilt via `npm ci` in-image.
+node_modules
+.next
+.git
+.github
+.env*
+*.log
+docs
+public
+.vercel
+README.md
