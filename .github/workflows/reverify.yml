@@ -1,0 +1,33 @@
+name: reverify
+on:
+  # Always reverify, but only AFTER backfill has finished — never concurrently
+  # (they share the one Gemini free-tier daily quota). workflow_run chains this
+  # right after each backfill run completes; it's self-regulating: reverify is
+  # Gemini-only and non-destructive (rejects are neutralized to weight 0, never
+  # deleted), so on days backfill exhausts the quota it simply SKIPs every row
+  # and exits, and only makes real progress once backfill no longer needs it.
+  workflow_run:
+    workflows: [backfill]
+    types: [completed]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: reverify
+  cancel-in-progress: false
+jobs:
+  reverify:
+    # manual dispatch always runs; the chained run only after a clean backfill
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - name: Re-verify Ollama-classified events with Gemini
+        run: npm run reverify -- --apply
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
