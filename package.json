@@ -16,7 +16,8 @@
     "seed:reports": "tsx scripts/seed-reports.ts",
     "seed:bios": "tsx scripts/seed-bios.ts",
     "seed:mmsi": "tsx scripts/seed-mmsi.ts",
-    "ais": "tsx scripts/ais-collector.ts"
+    "ais": "tsx scripts/ais-collector.ts",
+    "fix:misattribution": "tsx scripts/fix-misattribution.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.83",

@@ -10,8 +10,9 @@ const MethodologyPage = () => (
     </p>
     <h2 className="mt-8 text-lg font-medium">The Hypocrisy Score</h2>
     <pre className="mt-2 rounded bg-panel p-3 font-[family-name:var(--font-mono-num)] text-xs">
-{`score      = co2Tons12m × multiplier
-multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ weight × 0.5^(ageDays / ${CONFIG.score.halfLifeDays}))`}
+{`score      = co2Tons × multiplier + rhetoric
+multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ advocacyWeight × 0.5^(ageDays / ${CONFIG.score.halfLifeDays}))
+rhetoric   = min(${CONFIG.score.stanceCap}, ${CONFIG.score.stanceScale} × Σ stancePoints × 0.5^(ageDays / ${CONFIG.score.halfLifeDays}))`}
     </pre>
     <table className="mt-4 w-full text-left text-xs">
       <thead><tr className="text-dim"><th className="py-1">Advocacy event</th><th>Weight</th></tr></thead>
@@ -24,6 +25,14 @@ multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ weight × 0.5^(ageDay
         ))}
       </tbody>
     </table>
+    <p className="mt-3 text-dim">
+      <b>Rhetoric floor:</b> CO2 is the core signal, but figures who talk a lot or have documented
+      high-emission habits we can&apos;t yet quantify shouldn&apos;t read as a flat zero. So a small,
+      capped term adds <i>stancePoints</i> — the advocacy weight of what they <b>say</b>, plus
+      {' '}{CONFIG.score.negStanceUnit} per documented but unquantified thing they <b>do</b>
+      (a reported flight, yacht or asset with no CO2 figure). It&apos;s deliberately tiny: real tracked
+      tonnes (× multiplier) dwarf it, but a vocal climate preacher with no tracked jet still scores above zero.
+    </p>
     <p className="mt-3 text-dim">
       The leaderboard offers two windows: <b>Last 12 months</b> (the rolling score above,
       what they&apos;re emitting now) and <b>All-time</b> (lifetime documented CO2 × multiplier,

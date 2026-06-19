@@ -82,7 +82,8 @@ export const scoreSnapshots = pgTable('score_snapshots', {
   co2Kg12m: real('co2_kg_12m').notNull(),
   co2KgTotal: real('co2_kg_total').notNull(),
   multiplier: real('multiplier').notNull(),
-  score: real('score').notNull(),
+  stanceScore: real('stance_score').notNull().default(0), // additive rhetoric floor (say + documented-do)
+  score: real('score').notNull(), // co2Tons12m × multiplier + stanceScore
   rank: integer('rank').notNull(),
   co2RatePerSec: real('co2_rate_per_sec').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
