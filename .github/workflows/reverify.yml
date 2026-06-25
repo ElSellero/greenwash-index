@@ -17,8 +17,11 @@ concurrency:
   cancel-in-progress: false
 jobs:
   reverify:
-    # manual dispatch always runs; the chained run only after a clean backfill
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    # manual dispatch always runs. For the chained run: backfill is resumable and
+    # almost always hits its 350-min timeout (conclusion 'cancelled') rather than
+    # finishing 'success', so treat 'cancelled' as a normal end too — otherwise the
+    # reverify never fires. Only a genuine 'failure' is skipped.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'cancelled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
