@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '../src/lib/db/client';
 import { persons, seenArticles } from '../src/lib/db/schema';
 import { parseGdelt, dedupeArticles, type Article } from '../src/lib/ingest/news';
+import { personNameQuery } from '../src/lib/ingest/personSearch';
 import { classifyArticle, passesGuardrails, storeClassifiedEvent } from '../src/lib/ingest/classify';
 import { interCallDelayMs } from '../src/lib/ingest/llm';
 import { createHash } from 'node:crypto';
@@ -10,12 +11,12 @@ import { createHash } from 'node:crypto';
 const GDELT_WINDOW_DELAY_MS = 6_000;
 
 /** GDELT full-text archive reaches back years — query in yearly windows. */
-const fetchHistorical = async (name: string): Promise<Article[]> => {
+const fetchHistorical = async (slug: string, name: string): Promise<Article[]> => {
   const out: Article[] = [];
   const windows = ['2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025', '2025-2026'];
   for (const w of windows) {
     const [from, to] = w.split('-');
-    const q = encodeURIComponent(`"${name}" (climate OR "private jet" OR yacht OR donation)`);
+    const q = encodeURIComponent(`${personNameQuery(slug, name)} (climate OR "private jet" OR yacht OR donation)`);
     // one retry — GDELT throttling shows up as a non-ok status or a thrown timeout
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
@@ -56,7 +57,7 @@ const run = async () => {
     console.log(`\n=== ${p.name} ===`);
     let articles: Article[] = [];
     try {
-      articles = await fetchHistorical(p.name);
+      articles = await fetchHistorical(p.slug, p.name);
     } catch (err) {
       console.log(`  fetch failed (${err instanceof Error ? err.message : 'unknown'}) — skipping person`);
       continue;

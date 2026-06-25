@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import { personNameQuery } from './personSearch';
 
 export type Article = { title: string; url: string; publishedAt: Date };
 
@@ -39,17 +40,18 @@ export const dedupeArticles = (articles: Article[]): Article[] => {
 
 const CLIMATE_TERMS = '(climate OR emissions OR sustainability OR "private jet" OR yacht OR donation)';
 
-export const fetchArticlesFor = async (personName: string): Promise<Article[]> => {
+export const fetchArticlesFor = async (slug: string, name: string): Promise<Article[]> => {
+  const nameClause = personNameQuery(slug, name);
   const out: Article[] = [];
   try {
-    const q = encodeURIComponent(`"${personName}" ${CLIMATE_TERMS}`);
+    const q = encodeURIComponent(`${nameClause} ${CLIMATE_TERMS}`);
     const res = await fetch(`https://news.google.com/rss/search?q=${q}&hl=en-US&gl=US&ceid=US:en`, {
       signal: AbortSignal.timeout(10_000),
     });
     if (res.ok) out.push(...parseGoogleNewsRss(await res.text()));
   } catch { /* degrade */ }
   try {
-    const q = encodeURIComponent(`"${personName}" climate`);
+    const q = encodeURIComponent(`${nameClause} climate`);
     const res = await fetch(
       `https://api.gdeltproject.org/api/v2/doc/doc?query=${q}&mode=artlist&maxrecords=25&format=json&timespan=2d`,
       { signal: AbortSignal.timeout(10_000) },
