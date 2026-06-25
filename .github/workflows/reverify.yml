@@ -34,3 +34,10 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+      - name: Translate leftover foreign-language titles with Gemini
+        # non-destructive title/description-only cleanup; self-regulating like
+        # reverify (SKIPs when the shared Gemini daily quota is exhausted)
+        run: npm run translate -- --apply
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
