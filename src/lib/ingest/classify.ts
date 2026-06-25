@@ -182,7 +182,7 @@ export const runNewsScan = async (): Promise<{ scanned: number; stored: number }
   let classified = 0;
   for (const p of allPersons) {
     if (classified >= cap) break;
-    const articles = await fetchArticlesFor(p.name);
+    const articles = await fetchArticlesFor(p.slug, p.name);
     for (const article of articles) {
       if (classified >= cap) break;
       scanned++;
