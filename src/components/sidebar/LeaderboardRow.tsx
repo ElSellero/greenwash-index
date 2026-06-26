@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { LeaderboardEntry } from '@/lib/api-types';
 import { Co2Ticker } from '@/components/ui/Co2Ticker';
 import { FavoriteButton } from '@/components/ui/FavoriteButton';
+import { VehicleEmissions } from '@/components/person/VehicleEmissions';
 import { formatCo2Kg, formatScore } from '@/lib/format';
 import { useAppStore } from '@/lib/store';
 
@@ -44,6 +45,12 @@ export const LeaderboardRow = (
               </>
             )}
           </span>
+          <VehicleEmissions
+            vehicles={entry.vehicles}
+            jetCo2Kg={mode === 'all' ? entry.jetCo2KgTotal : entry.jetCo2Kg12m}
+            yachtCo2Kg={mode === 'all' ? entry.yachtCo2KgTotal : entry.yachtCo2Kg12m}
+            variant="compact"
+          />
         </span>
         <FavoriteButton personId={entry.personId} />
         <Link href={`/person/${entry.slug}`} onClick={(e) => e.stopPropagation()}
