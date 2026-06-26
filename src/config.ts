@@ -52,6 +52,16 @@ export const CONFIG = {
     jetFallbackKgPerKm: 4.5,
     /** Rolling window for the score's emission base (days). */
     windowDays: 365,
+    /**
+     * A documented news flight / yacht trip is a real high-emission ACT, but the
+     * article rarely states the distance. Rather than letting it vanish (CO2 = 0,
+     * only a tiny rhetoric-floor point), we assign a deliberately CONSERVATIVE
+     * estimated tonnage = representativeKm × the person's known vehicle factor —
+     * the same kg/km math the live tracker uses, just with a stand-in distance.
+     * Clearly surfaced as "estimated". Understates frequent flyers on purpose.
+     */
+    estimatedFlightKm: 1500, // one representative private-jet sector
+    estimatedYachtTripKm: 500, // one representative yacht voyage
   },
   cache: {
     leaderboardSMaxAge: 300,

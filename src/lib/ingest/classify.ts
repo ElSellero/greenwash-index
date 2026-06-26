@@ -3,7 +3,8 @@ import { and, eq, gte, lte, sql } from 'drizzle-orm';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { db } from '@/lib/db/client';
-import { events, persons, seenArticles } from '@/lib/db/schema';
+import { events, persons, seenArticles, vehicles } from '@/lib/db/schema';
+import { tripCo2Kg } from '@/lib/score/co2';
 import { fetchArticlesFor, type Article } from './news';
 import {
   classifierChain, interCallDelayMs, isOllama, maxClassificationsPerRun,
@@ -114,6 +115,26 @@ export const classifyArticle = (
 export const advocacyWeightFor = (type: Classification['type']): number =>
   CONFIG.score.advocacyWeights[type as keyof typeof CONFIG.score.advocacyWeights] ?? 1;
 
+/**
+ * Estimated CO2 for a documented TRAVEL act (flight / yacht trip) from the
+ * person's known vehicle, using the same kg/km math as live tracking with a
+ * conservative stand-in distance — so a reported trip lands as estimated tonnage
+ * instead of vanishing. Ownership ('asset') and all non-travel types return null
+ * (they stay in the rhetoric floor); null too when no matching vehicle is on file.
+ */
+export const estimatedActCo2Kg = async (
+  personId: number,
+  type: Classification['type'],
+): Promise<number | null> => {
+  const vType = type === 'flight' ? 'jet' : type === 'yacht_trip' ? 'yacht' : null;
+  if (!vType) return null;
+  const [v] = await db.select({ kgPerKm: vehicles.co2KgPerKm }).from(vehicles)
+    .where(and(eq(vehicles.personId, personId), eq(vehicles.type, vType))).limit(1);
+  if (!v) return null;
+  const km = type === 'flight' ? CONFIG.co2.estimatedFlightKm : CONFIG.co2.estimatedYachtTripKm;
+  return tripCo2Kg(km, v.kgPerKm);
+};
+
 export type StoreResult = 'merged' | 'echo' | 'new';
 
 /**
@@ -154,6 +175,9 @@ export const storeClassifiedEvent = async (
   }
 
   const echo = decision.action === 'echo';
+  // documented flights/yacht trips get a conservative estimated tonnage from the
+  // person's known vehicle; everything else (ownership, advocacy) stays co2Kg null
+  const co2Kg = c.kind === 'negative' ? await estimatedActCo2Kg(personId, c.type) : null;
   await db.insert(events).values({
     personId,
     kind: c.kind,
@@ -162,6 +186,7 @@ export const storeClassifiedEvent = async (
     description: c.summary.slice(0, 400),
     sourceUrl,
     occurredAt,
+    co2Kg,
     advocacyWeight: c.kind === 'positive' ? advocacyWeightFor(c.type) : null,
     weightFactor: echo ? CONFIG.score.dedup.echoWeightFactor : 1,
     confidence: c.confidence,

@@ -1,4 +1,4 @@
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { events, positions, scoreSnapshots, trips, vehicles, persons } from '@/lib/db/schema';
 import { getTopNPersonIds, getVehiclesForPersons } from '@/lib/db/queries';
@@ -85,10 +85,12 @@ export const recomputeScores = async (now = new Date()): Promise<number> => {
   const dayStart = new Date(now.getTime() - 86_400_000);
   const scored = [] as { personId: number; co2Kg12m: number; co2KgTotal: number; multiplier: number; stanceScore: number; score: number; co2RatePerSec: number }[];
   for (const p of allPersons) {
+    // weight the tonnage by weight_factor: neutralized acts (0) drop out, echoes
+    // (<1) count proportionally, so down-weighting applies to CO2 just like score.
     const sums = await db.select({
-      kg12m: sql<number>`coalesce(sum(${events.co2Kg}) filter (where ${events.occurredAt} >= ${windowStart}), 0)`,
-      kgTotal: sql<number>`coalesce(sum(${events.co2Kg}), 0)`,
-      kg24h: sql<number>`coalesce(sum(${events.co2Kg}) filter (where ${events.occurredAt} >= ${dayStart}), 0)`,
+      kg12m: sql<number>`coalesce(sum(${events.co2Kg} * ${events.weightFactor}) filter (where ${events.occurredAt} >= ${windowStart}), 0)`,
+      kgTotal: sql<number>`coalesce(sum(${events.co2Kg} * ${events.weightFactor}), 0)`,
+      kg24h: sql<number>`coalesce(sum(${events.co2Kg} * ${events.weightFactor}) filter (where ${events.occurredAt} >= ${dayStart}), 0)`,
     }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'negative')));
     const advocacy = await db.select({
       weight: events.advocacyWeight, weightFactor: events.weightFactor, occurredAt: events.occurredAt,
@@ -96,7 +98,8 @@ export const recomputeScores = async (now = new Date()): Promise<number> => {
     // documented "what they do" acts without a CO2 figure (news flights/yachts/assets)
     const negUnquantified = await db.select({ occurredAt: events.occurredAt })
       .from(events)
-      .where(and(eq(events.personId, p.id), eq(events.kind, 'negative'), isNull(events.co2Kg)));
+      .where(and(eq(events.personId, p.id), eq(events.kind, 'negative'), isNull(events.co2Kg),
+        gt(events.weightFactor, 0)));
 
     const m = advocacyMultiplier(
       // echo/repeat events carry weightFactor < 1 so repetition can't inflate the score

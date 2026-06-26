@@ -32,12 +32,14 @@ export const ScoreBreakdown = ({ snapshot }: { snapshot: NonNullable<PersonDetai
         </div>
       </dl>
       <p className="mt-3 text-xs text-dim">
-        Documented CO2 (tonnes) × advocacy multiplier (1–10, decaying over 24 months). A small
-        <b className="text-slate-300"> rhetoric floor </b> adds documented but unquantified high-emission acts
-        (a reported jet, yacht or mansion), amplified by that multiplier — so green-talk-plus-untracked-exhaust
-        isn&apos;t a flat zero. <b className="text-slate-300">Advocacy alone never scores</b>: a consistent climate
-        advocate with no such act stays at zero. <b className="text-slate-300">All-time</b> counts every documented
-        tonne (incl. cited reports); <b className="text-slate-300">12-month</b> is the rolling window.
+        Documented CO2 (tonnes) × advocacy multiplier (1–10, decaying over 24 months). Reported flights
+        &amp; yacht trips get a conservative <b className="text-slate-300">estimated</b> tonnage from the
+        person&apos;s known jet/yacht; a small <b className="text-slate-300">rhetoric floor</b> adds documented
+        ownership (a jet, yacht or mansion) we can&apos;t turn into a trip, amplified by that multiplier — so
+        green-talk-plus-untracked-exhaust isn&apos;t a flat zero. <b className="text-slate-300">Advocacy alone
+        never scores</b>: a consistent climate advocate with no such act stays at zero.
+        <b className="text-slate-300"> All-time</b> counts every documented tonne (incl. cited reports);
+        <b className="text-slate-300"> 12-month</b> is the rolling window.
         <a href="/methodology" className="text-accent hover:underline"> Methodology</a>.
       </p>
     </div>

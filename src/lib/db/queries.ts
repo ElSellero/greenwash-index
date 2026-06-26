@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { db } from './client';
 import { events, persons, positions, scoreSnapshots, trips, vehicles } from './schema';
+import { allTimeScore } from '@/lib/score/hypocrisy';
 
 /** Latest snapshot per person joined with person — the leaderboard. */
 export const getLeaderboard = async () => {
@@ -48,11 +49,9 @@ export const getPersonDetail = async (slug: string) => {
       .orderBy(desc(scoreSnapshots.snapshotDate)).limit(1),
     getLeaderboard(),
   ]);
-  // all-time rank (lifetime CO2 × multiplier) — matches the leaderboard's default view
-  const allTime = (e: { co2KgTotal: number; multiplier: number; stanceScore: number }) =>
-    (e.co2KgTotal / 1000) * e.multiplier + e.stanceScore;
+  // all-time rank (lifetime CO2 × multiplier) — matches the leaderboard's all-time view
   const allTimeRank = [...board]
-    .sort((a, b) => allTime(b) - allTime(a))
+    .sort((a, b) => allTimeScore(b) - allTimeScore(a))
     .findIndex((e) => e.personId === person.id) + 1 || null;
   return { person, vehicles: personVehicles, events: personEvents, snapshot: snapshot[0] ?? null, allTimeRank };
 };
