@@ -1,32 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { advocacyMultiplier, hypocrisyScore, rankPersons, stanceScore } from '@/lib/score/hypocrisy';
 
-const NOW = new Date('2026-06-10T00:00:00Z');
-const daysAgo = (d: number) => new Date(NOW.getTime() - d * 86_400_000);
-
 describe('advocacyMultiplier', () => {
   it('is 1 with no advocacy (the silent emitter)', () => {
-    expect(advocacyMultiplier([], NOW)).toBe(1);
+    expect(advocacyMultiplier([])).toBe(1);
   });
-  it('adds full weight for a fresh event', () => {
-    expect(advocacyMultiplier([{ weight: 5, occurredAt: NOW }], NOW)).toBeCloseTo(6, 5);
-  });
-  it('halves weight after one half-life (730 days)', () => {
-    expect(advocacyMultiplier([{ weight: 4, occurredAt: daysAgo(730) }], NOW)).toBeCloseTo(3, 2);
+  it('adds full weight, with no time decay', () => {
+    expect(advocacyMultiplier([{ weight: 5 }])).toBe(6);
   });
   it('caps at 10', () => {
-    const spam = Array.from({ length: 100 }, () => ({ weight: 5, occurredAt: NOW }));
-    expect(advocacyMultiplier(spam, NOW)).toBe(10);
+    const spam = Array.from({ length: 100 }, () => ({ weight: 5 }));
+    expect(advocacyMultiplier(spam)).toBe(10);
   });
 });
 
 describe('hypocrisyScore', () => {
   it('preacher outranks silent emitter at equal CO2', () => {
-    const silent = hypocrisyScore(3000, advocacyMultiplier([], NOW));
-    const preacher = hypocrisyScore(
-      3000,
-      advocacyMultiplier([{ weight: 5, occurredAt: NOW }], NOW),
-    );
+    const silent = hypocrisyScore(3000, advocacyMultiplier([]));
+    const preacher = hypocrisyScore(3000, advocacyMultiplier([{ weight: 5 }]));
     expect(preacher).toBeGreaterThan(silent);
     expect(silent).toBe(3000);
   });
@@ -35,18 +26,16 @@ describe('hypocrisyScore', () => {
 describe('stanceScore (rhetoric floor)', () => {
   it('is 0 with no documented acts, however loud the advocacy', () => {
     // a pure climate advocate (high multiplier, zero dirty deeds) is NOT a hypocrite
-    expect(stanceScore([], 10, NOW)).toBe(0);
+    expect(stanceScore([], 10)).toBe(0);
   });
   it('scores documented unquantified acts, amplified by the multiplier', () => {
-    const quiet = stanceScore([{ points: 1.5, occurredAt: NOW }], 1, NOW);
-    const loud = stanceScore([{ points: 1.5, occurredAt: NOW }], 10, NOW);
+    const quiet = stanceScore([{ points: 1.5 }], 1);
+    const loud = stanceScore([{ points: 1.5 }], 10);
     expect(quiet).toBeGreaterThan(0);
     expect(loud).toBeCloseTo(quiet * 10, 5); // talk × deeds
   });
-  it('decays an act by half after one half-life', () => {
-    const fresh = stanceScore([{ points: 1.5, occurredAt: NOW }], 2, NOW);
-    const aged = stanceScore([{ points: 1.5, occurredAt: daysAgo(730) }], 2, NOW);
-    expect(aged).toBeCloseTo(fresh / 2, 5);
+  it('does not decay with age — a documented act counts the same whenever it happened', () => {
+    expect(stanceScore([{ points: 1.5 }], 2)).toBe(stanceScore([{ points: 1.5 }], 2));
   });
 });
 

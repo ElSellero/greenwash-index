@@ -93,24 +93,21 @@ export const recomputeScores = async (now = new Date()): Promise<number> => {
       kg24h: sql<number>`coalesce(sum(${events.co2Kg} * ${events.weightFactor}) filter (where ${events.occurredAt} >= ${dayStart}), 0)`,
     }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'negative')));
     const advocacy = await db.select({
-      weight: events.advocacyWeight, weightFactor: events.weightFactor, occurredAt: events.occurredAt,
+      weight: events.advocacyWeight, weightFactor: events.weightFactor,
     }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'positive')));
     // documented "what they do" acts without a CO2 figure (news flights/yachts/assets)
-    const negUnquantified = await db.select({ occurredAt: events.occurredAt })
+    const negUnquantified = await db.select({ id: events.id })
       .from(events)
       .where(and(eq(events.personId, p.id), eq(events.kind, 'negative'), isNull(events.co2Kg),
         gt(events.weightFactor, 0)));
 
-    const m = advocacyMultiplier(
-      // echo/repeat events carry weightFactor < 1 so repetition can't inflate the score
-      advocacy.map((a) => ({ weight: (a.weight ?? 1) * (a.weightFactor ?? 1), occurredAt: a.occurredAt })), now);
+    // echo/repeat events carry weightFactor < 1 so repetition can't inflate the score
+    const m = advocacyMultiplier(advocacy.map((a) => ({ weight: (a.weight ?? 1) * (a.weightFactor ?? 1) })));
     // rhetoric floor: ONLY documented "what they do" acts without a CO2 figure, amplified
     // by the advocacy multiplier (talk × deeds). Positive advocacy alone never scores — a
     // consistent climate advocate with no documented high-emission act stays at zero.
-    const stancePts: StanceEvent[] = negUnquantified.map((e) => ({
-      points: CONFIG.score.negStanceUnit, occurredAt: e.occurredAt,
-    }));
-    const stance = stanceScore(stancePts, m, now);
+    const stancePts: StanceEvent[] = negUnquantified.map(() => ({ points: CONFIG.score.negStanceUnit }));
+    const stance = stanceScore(stancePts, m);
     const co2Kg12m = sums[0]?.kg12m ?? 0;
     scored.push({
       personId: p.id,
