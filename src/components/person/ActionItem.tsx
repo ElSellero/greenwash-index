@@ -1,6 +1,7 @@
 import type { PersonDetail } from '@/lib/api-types';
 import { SourceBadge } from '@/components/ui/SourceBadge';
 import { formatCo2Kg } from '@/lib/format';
+import { safeHref } from '@/lib/url';
 
 export const ActionItem = ({ event }: { event: PersonDetail['events'][number] }) => {
   const positive = event.kind === 'positive';
@@ -21,10 +22,10 @@ export const ActionItem = ({ event }: { event: PersonDetail['events'][number] })
       {event.description && <p className="mt-0.5 text-xs text-dim">{event.description}</p>}
       <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
         <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-          <a href={sources[0]} target="_blank" rel="noopener noreferrer"
+          <a href={safeHref(sources[0])} target="_blank" rel="noopener noreferrer"
             className="text-accent underline-offset-2 hover:underline">source ↗</a>
           {sources.slice(1, 4).map((url, i) => (
-            <a key={url} href={url} target="_blank" rel="noopener noreferrer"
+            <a key={url} href={safeHref(url)} target="_blank" rel="noopener noreferrer"
               title="Another outlet reporting the same event"
               className="font-[family-name:var(--font-mono-num)] text-dim hover:text-accent">
               [{i + 2}]
