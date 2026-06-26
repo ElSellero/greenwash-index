@@ -40,6 +40,15 @@ export const stanceScore = (acts: StanceEvent[], multiplier: number, now: Date):
   return Math.min(stanceCap, stanceScale * multiplier * sum);
 };
 
+/**
+ * All-time hypocrisy score: lifetime documented CO2 (tonnes) × advocacy multiplier
+ * + rhetoric floor. The leaderboard's "All-time" window, the person page's all-time
+ * rank, and the info popup all rank by THIS — keep them on one definition.
+ */
+export const allTimeScore = (
+  e: { co2KgTotal: number; multiplier: number; stanceScore: number },
+): number => (e.co2KgTotal / 1000) * e.multiplier + e.stanceScore;
+
 export const rankPersons = <T extends { score: number }>(
   rows: T[],
 ): (T & { rank: number })[] =>

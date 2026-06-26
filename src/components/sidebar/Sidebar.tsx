@@ -1,12 +1,14 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { LeaderboardEntry } from '@/lib/api-types';
 import { LeaderboardRow } from './LeaderboardRow';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useAppStore } from '@/lib/store';
+import { clampSheetHeight, snapExpanded, DRAG_THRESHOLD_PX } from '@/lib/sheet';
+import { allTimeScore } from '@/lib/score/hypocrisy';
 
-// all-time hypocrisy score = lifetime CO2 (tonnes) × advocacy multiplier + rhetoric floor
-const allTimeScore = (e: LeaderboardEntry) => (e.co2KgTotal / 1000) * e.multiplier + e.stanceScore;
+const COLLAPSED_PX = 144; // matches the collapsed h-36 snap point
+const expandedPx = () => Math.round(0.7 * window.innerHeight); // matches h-[70dvh]
 
 export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
   const search = useAppStore((s) => s.search);
@@ -14,7 +16,28 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
   const favorites = useAppStore((s) => s.favorites);
   const rankMode = useAppStore((s) => s.rankMode);
   const setRankMode = useAppStore((s) => s.setRankMode);
-  const [expanded, setExpanded] = useState(false); // mobile sheet state
+  const [expanded, setExpanded] = useState(false); // mobile sheet snap target
+  const [dragHeight, setDragHeight] = useState<number | null>(null); // live px while dragging
+  const drag = useRef<{ startY: number; startH: number; moved: boolean } | null>(null);
+
+  const onHandleDown = (e: React.PointerEvent) => {
+    drag.current = { startY: e.clientY, startH: expanded ? expandedPx() : COLLAPSED_PX, moved: false };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onHandleMove = (e: React.PointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    const delta = e.clientY - d.startY; // finger down = positive
+    if (Math.abs(delta) > DRAG_THRESHOLD_PX) d.moved = true;
+    setDragHeight(clampSheetHeight(d.startH - delta, COLLAPSED_PX, expandedPx()));
+  };
+  const onHandleUp = () => {
+    const d = drag.current;
+    drag.current = null;
+    if (d?.moved && dragHeight != null) setExpanded(snapExpanded(dragHeight, COLLAPSED_PX, expandedPx()));
+    else setExpanded((v) => !v); // a tap (no real drag) still toggles
+    setDragHeight(null);
+  };
 
   // stable rank per mode, independent of search/favorites reordering
   const rankByMode = useMemo(() => {
@@ -37,13 +60,17 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
 
   return (
     <aside
+      style={dragHeight != null ? { height: dragHeight, transition: 'none' } : undefined}
       className={`absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl border border-panel-edge bg-panel/90 backdrop-blur
-        transition-[height] duration-300 md:inset-y-0 md:left-0 md:right-auto md:h-full md:w-80 md:rounded-none md:border-y-0 md:border-l-0
-        ${expanded ? 'h-[70dvh]' : 'h-36'} md:h-full`}
+        transition-[height] duration-300 md:inset-y-0 md:left-0 md:right-auto md:!h-full md:w-80 md:rounded-none md:border-y-0 md:border-l-0
+        ${expanded ? 'h-[70dvh]' : 'h-36'}`}
     >
-      <button className="cursor-pointer py-3 md:hidden" aria-label="Toggle leaderboard"
-        onClick={() => setExpanded((v) => !v)}>
-        <span className="mx-auto block h-1 w-10 rounded bg-panel-edge" />
+      <button
+        className="flex w-full shrink-0 cursor-grab touch-none select-none items-center justify-center py-3 active:cursor-grabbing md:hidden"
+        aria-label={expanded ? 'Collapse leaderboard' : 'Expand leaderboard'} aria-expanded={expanded}
+        onPointerDown={onHandleDown} onPointerMove={onHandleMove}
+        onPointerUp={onHandleUp} onPointerCancel={onHandleUp}>
+        <span className="block h-1.5 w-10 rounded-full bg-panel-edge" />
       </button>
       <div className="px-4 pb-3 md:pt-5">
         <h1 className="text-xs font-semibold uppercase tracking-[0.2em] text-dim">

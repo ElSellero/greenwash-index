@@ -26,13 +26,20 @@ rhetoric   = min(${CONFIG.score.stanceCap}, ${CONFIG.score.stanceScale} × multi
       </tbody>
     </table>
     <p className="mt-3 text-dim">
-      <b>Rhetoric floor:</b> hypocrisy needs the gap — green talk <i>and</i> dirty deeds. CO2 is the
-      core signal, but some figures have documented high-emission habits (a reported private jet,
-      yacht or mansion) we can&apos;t yet put a CO2 number on. A small, capped term counts each such
-      <i> unquantified act</i>, amplified by the same advocacy multiplier, so loud-talk-plus-untracked-exhaust
-      reads above zero. Crucially, <b>advocacy alone never scores</b>: someone who only champions the
-      climate and has no documented high-emission act stays at zero — they&apos;re consistent, not a
-      hypocrite. And it&apos;s deliberately tiny — real tracked tonnes (× multiplier) dwarf it.
+      <b>Estimated travel:</b> when a flight or yacht trip is documented in the news but no distance is
+      given, we assign a deliberately conservative estimated tonnage from the person&apos;s known aircraft
+      or vessel — a representative {CONFIG.co2.estimatedFlightKm} km flight / {CONFIG.co2.estimatedYachtTripKm} km
+      voyage × the kg/km factors below — clearly marked <i>estimated</i>, and intentionally understating
+      frequent flyers rather than overstating them.
+    </p>
+    <p className="mt-3 text-dim">
+      <b>Rhetoric floor:</b> hypocrisy needs the gap — green talk <i>and</i> dirty deeds. Documented
+      <i> ownership</i> we can&apos;t turn into a trip (a reported private jet, yacht or mansion) still
+      counts via a small, capped floor term, amplified by the same advocacy multiplier, so
+      loud-talk-plus-untracked-exhaust reads above zero. Crucially, <b>advocacy alone never scores</b>:
+      someone who only champions the climate and has no documented high-emission act stays at zero —
+      they&apos;re consistent, not a hypocrite. The floor is deliberately tiny — real tracked tonnes
+      (× multiplier) dwarf it.
     </p>
     <p className="mt-3 text-dim">
       The leaderboard offers two windows: <b>Last 12 months</b> (the rolling score above,
