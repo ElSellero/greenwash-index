@@ -11,6 +11,12 @@ export const getLeaderboard = async () => {
       maxDate: sql<string>`max(${scoreSnapshots.snapshotDate})`.as('max_date'),
     }).from(scoreSnapshots).groupBy(scoreSnapshots.personId),
   );
+  // CO2 from a person's negative events of one type (flight ⇒ jet, yacht_trip ⇒
+  // yacht), weighted by weight_factor; optionally limited to the rolling 12 months.
+  const co2OfType = (type: 'flight' | 'yacht_trip', last12m: boolean) => sql<number>`coalesce((
+    select sum(e.co2_kg * e.weight_factor) from ${events} e
+    where e.person_id = ${scoreSnapshots.personId} and e.kind = 'negative' and e.type = ${type}
+    ${last12m ? sql`and e.occurred_at >= now() - interval '365 days'` : sql``}), 0)`;
   return db.with(latest)
     .select({
       personId: persons.id,
@@ -26,6 +32,15 @@ export const getLeaderboard = async () => {
       rank: scoreSnapshots.rank,
       co2RatePerSec: scoreSnapshots.co2RatePerSec,
       snapshotDate: scoreSnapshots.snapshotDate,
+      // fleet names + per-vehicle-type emissions, so the UI can break jet vs yacht apart
+      vehicles: sql<{ type: string; name: string }[]>`coalesce((
+        select json_agg(json_build_object('type', v.type, 'name', v.name)
+          order by case v.type when 'jet' then 0 else 1 end, v.id)
+        from ${vehicles} v where v.person_id = ${scoreSnapshots.personId}), '[]'::json)`,
+      jetCo2Kg12m: co2OfType('flight', true),
+      jetCo2KgTotal: co2OfType('flight', false),
+      yachtCo2Kg12m: co2OfType('yacht_trip', true),
+      yachtCo2KgTotal: co2OfType('yacht_trip', false),
     })
     .from(scoreSnapshots)
     .innerJoin(latest, and(

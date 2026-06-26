@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getPersonDetail } from '@/lib/db/queries';
 import { ActionColumns } from '@/components/person/ActionColumns';
 import { ScoreBreakdown } from '@/components/person/ScoreBreakdown';
+import { VehicleEmissions } from '@/components/person/VehicleEmissions';
 import { Co2Ticker } from '@/components/ui/Co2Ticker';
 import { AdSlot } from '@/components/ui/AdSlot';
 
@@ -13,6 +14,12 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
   const detail = await getPersonDetail(slug);
   if (!detail) notFound();
   const { person, snapshot, events, vehicles, allTimeRank } = detail;
+  // split tracked emissions by vehicle type: flights ⇒ jets, yacht trips ⇒ yachts
+  const fleetCo2 = (type: 'flight' | 'yacht_trip') => events
+    .filter((e) => e.kind === 'negative' && e.type === type && e.co2Kg != null)
+    .reduce((sum, e) => sum + (e.co2Kg ?? 0) * (e.weightFactor ?? 1), 0);
+  const jetCo2 = fleetCo2('flight');
+  const yachtCo2 = fleetCo2('yacht_trip');
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-12 pt-14 sm:px-6 lg:px-8">
@@ -37,6 +44,16 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
         )}
       </header>
       {snapshot && <div className="mt-6"><ScoreBreakdown snapshot={snapshot} /></div>}
+      {vehicles.length > 0 && (
+        <div className="mt-6 rounded-xl border border-panel-edge bg-panel p-4">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-dim">Fleet — tracked emissions (all-time)</p>
+          <div className="mt-3"><VehicleEmissions vehicles={vehicles} jetCo2Kg={jetCo2} yachtCo2Kg={yachtCo2} /></div>
+          <p className="mt-3 text-xs text-dim">
+            Jet figures come from documented flights, yacht figures from documented voyages; ownership without a
+            logged trip (a mansion, an idle jet) feeds the rhetoric floor, not the tonnage above.
+          </p>
+        </div>
+      )}
       <div className="mt-8"><ActionColumns events={events} /></div>
       <div className="mt-10"><AdSlot slot="person-footer" /></div>
     </main>

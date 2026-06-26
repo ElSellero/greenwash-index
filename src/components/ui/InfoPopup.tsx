@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import type { LeaderboardEntry, PositionsPayload } from '@/lib/api-types';
 import { Co2Ticker } from './Co2Ticker';
 import { SourceBadge } from './SourceBadge';
+import { VehicleEmissions } from '@/components/person/VehicleEmissions';
 import { useAppStore } from '@/lib/store';
 import { shouldDismiss } from '@/lib/sheet';
 import { allTimeScore } from '@/lib/score/hypocrisy';
@@ -75,6 +76,16 @@ export const InfoPopup = ({ entries, positions }: {
           <dd className="font-[family-name:var(--font-mono-num)]">{entry.multiplier.toFixed(1)}</dd>
         </div>
       </dl>
+      {entry.vehicles.length > 0 && (
+        <div className="mt-3 border-t border-panel-edge pt-3">
+          <p className="mb-1.5 text-[10px] uppercase tracking-[0.2em] text-dim">
+            Fleet · {rankMode === 'all' ? 'all-time' : '12 months'}
+          </p>
+          <VehicleEmissions vehicles={entry.vehicles}
+            jetCo2Kg={rankMode === 'all' ? entry.jetCo2KgTotal : entry.jetCo2Kg12m}
+            yachtCo2Kg={rankMode === 'all' ? entry.yachtCo2KgTotal : entry.yachtCo2Kg12m} />
+        </div>
+      )}
       <Link href={`/person/${entry.slug}`}
         className="mt-3 block rounded border border-accent/40 py-1.5 text-center text-sm text-accent transition hover:bg-accent/10">
         Full hypocrisy report →
