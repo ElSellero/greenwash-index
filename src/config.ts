@@ -10,8 +10,6 @@ export const CONFIG = {
     topN: 20,
   },
   score: {
-    /** Advocacy decay half-life in days (24 months). */
-    halfLifeDays: 730,
     /** multiplier ∈ [1, multiplierCap] */
     multiplierCap: 10,
     /** Events below this LLM confidence are discarded. */
