@@ -33,6 +33,17 @@ export const InfoPopup = ({ entries, positions }: {
   const vehicle = positions.find((p) => p.vehicleId === selectedVehicleId)
     ?? positions.find((p) => p.personId === selectedPersonId);
 
+  // Fleet rows are clickable to aim the globe. Pick a representative position per
+  // vehicle type for this person, preferring one that's currently en route.
+  const personPositions = positions.filter((p) => p.personId === selectedPersonId);
+  const pickPos = (type: 'jet' | 'yacht') =>
+    personPositions.find((p) => p.type === type && p.isMoving)
+    ?? personPositions.find((p) => p.type === type);
+  const selectableTypes = (['jet', 'yacht'] as const).filter((t) => pickPos(t));
+  // Highlight a fleet row only when its vehicle is the one explicitly selected.
+  const activeType = positions.find((p) => p.vehicleId === selectedVehicleId)?.type as
+    'jet' | 'yacht' | undefined;
+
   // swipe-down-to-dismiss: no pointer capture, so taps on the link/close still fire
   const onDown = (e: React.PointerEvent) => { startY.current = e.clientY; };
   const onMove = (e: React.PointerEvent) => {
@@ -83,7 +94,10 @@ export const InfoPopup = ({ entries, positions }: {
           </p>
           <VehicleEmissions vehicles={entry.vehicles}
             jetCo2Kg={rankMode === 'all' ? entry.jetCo2KgTotal : entry.jetCo2Kg12m}
-            yachtCo2Kg={rankMode === 'all' ? entry.yachtCo2KgTotal : entry.yachtCo2Kg12m} />
+            yachtCo2Kg={rankMode === 'all' ? entry.yachtCo2KgTotal : entry.yachtCo2Kg12m}
+            selectableTypes={selectableTypes}
+            activeType={activeType ?? null}
+            onSelectType={(type) => { const p = pickPos(type); if (p) select(p.personId, p.vehicleId); }} />
         </div>
       )}
       <Link href={`/person/${entry.slug}`}
