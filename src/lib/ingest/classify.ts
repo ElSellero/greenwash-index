@@ -11,6 +11,7 @@ import {
   ollamaGenerateObject, ollamaLabel, runWithFallback, type Attempt,
 } from './llm';
 import { dedupDecision } from './dedup';
+import { hasForeignScript, translateToEnglish } from './translate';
 import { CONFIG } from '@/config';
 
 export const classificationSchema = z.object({
@@ -175,6 +176,16 @@ export const storeClassifiedEvent = async (
   }
 
   const echo = decision.action === 'echo';
+  // Guarantee an English title/summary BEFORE the event can ever be displayed:
+  // the classifier is told to translate, but the weak Gemini tier occasionally
+  // keeps the source-language headline — so re-translate inline here. (The
+  // standalone translate step is now only a backstop for legacy human/seed rows.)
+  let title = c.title;
+  let summary = c.summary;
+  if (hasForeignScript(title, summary)) {
+    const en = await translateToEnglish(title, summary);
+    if (en) { title = en.title; summary = en.summary; }
+  }
   // documented flights/yacht trips get a conservative estimated tonnage from the
   // person's known vehicle; everything else (ownership, advocacy) stays co2Kg null
   const co2Kg = c.kind === 'negative' ? await estimatedActCo2Kg(personId, c.type) : null;
@@ -182,8 +193,8 @@ export const storeClassifiedEvent = async (
     personId,
     kind: c.kind,
     type: c.type,
-    title: c.title.slice(0, 140),
-    description: c.summary.slice(0, 400),
+    title: title.slice(0, 140),
+    description: summary.slice(0, 400),
     sourceUrl,
     occurredAt,
     co2Kg,
