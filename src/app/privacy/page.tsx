@@ -61,7 +61,7 @@ const PrivacyPage = () => (
       applicable German press/media law) and our legitimate interest in public-interest reporting
       (Art. 6(1)(f) GDPR). Every claim links to its source. Featured persons may request
       rectification or removal of any event whose source does not support it — see the{' '}
-      <a href="/methodology" className="text-accent hover:underline">methodology</a> and the
+      <a href="/methodology" className="text-accent hover:underline">methodology</a>{' '}and the
       contact in the <a href="/imprint" className="text-accent hover:underline">imprint</a>;
       substantiated requests are honored promptly.
     </p>
