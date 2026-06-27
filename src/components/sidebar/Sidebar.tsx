@@ -59,6 +59,15 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
   }, [entries, search, favorites, rankMode]);
 
   return (
+    <>
+      {/* mobile: tapping the globe behind the open sheet collapses it (outside-click) */}
+      {expanded && (
+        <button
+          type="button" tabIndex={-1} aria-label="Collapse leaderboard"
+          onClick={() => setExpanded(false)}
+          className="absolute inset-0 z-10 cursor-default bg-black/20 backdrop-blur-[1px] md:hidden"
+        />
+      )}
     <aside
       style={dragHeight != null ? { height: dragHeight, transition: 'none' } : undefined}
       className={`absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl border border-panel-edge bg-panel/90 backdrop-blur
@@ -105,5 +114,6 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
         <li className="p-3"><AdSlot slot="sidebar-bottom" /></li>
       </ul>
     </aside>
+    </>
   );
 };
