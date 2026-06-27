@@ -30,15 +30,15 @@ since the window already carries recency.`}
       </tbody>
     </table>
     <p className="mt-3 text-dim">
-      <b>Estimated travel:</b> when a flight or yacht trip is documented in the news but no distance is
+      <b>Estimated travel:</b>{' '}when a flight or yacht trip is documented in the news but no distance is
       given, we assign a deliberately conservative estimated tonnage from the person&apos;s known aircraft
       or vessel — a representative {CONFIG.co2.estimatedFlightKm} km flight / {CONFIG.co2.estimatedYachtTripKm} km
       voyage × the kg/km factors below — clearly marked <i>estimated</i>, and intentionally understating
       frequent flyers rather than overstating them.
     </p>
     <p className="mt-3 text-dim">
-      <b>Rhetoric floor:</b> hypocrisy needs the gap — green talk <i>and</i> dirty deeds. Documented
-      <i> ownership</i> we can&apos;t turn into a trip (a reported private jet, yacht or mansion) still
+      <b>Rhetoric floor:</b>{' '}hypocrisy needs the gap — green talk <i>and</i>{' '}dirty deeds. Documented
+      <i> ownership</i>{' '}we can&apos;t turn into a trip (a reported private jet, yacht or mansion) still
       counts via a small, capped floor term, amplified by the same advocacy multiplier, so
       loud-talk-plus-untracked-exhaust reads above zero. Crucially, <b>advocacy alone never scores</b>:
       someone who only champions the climate and has no documented high-emission act stays at zero —
