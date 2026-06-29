@@ -4,7 +4,14 @@ export const CONFIG = {
     tagline: 'Tracking the gap between climate talk and climate exhaust.',
   },
   live: {
-    /** GitHub Actions cadence (min). Keep >= 10 — free community APIs. */
+    /**
+     * Target cadence (min) for the GitHub Actions live scan. Keep >= 10 —
+     * free community APIs. NOTE: this is best-effort only — GitHub drops/delays
+     * scheduled runs at peak load, so the *effective* interval is ~30–60 min
+     * (~10–16 runs/day). The guaranteed full news scan is the Vercel cron
+     * `/api/ingest/news` at 08:00 UTC (see vercel.json); the live scan just
+     * adds freshness + top-N position refreshes on top of that.
+     */
     intervalMinutes: 15,
     /** Only this many top-ranked persons get live position refreshes. */
     topN: 20,

@@ -1,7 +1,12 @@
 name: live-ingest
 on:
   schedule:
-    - cron: '*/15 * * * *'   # keep in sync with CONFIG.live.intervalMinutes
+    # Off-peak minutes (not :00) on purpose: GitHub drops scheduled runs at the
+    # top-of-hour peak, so :07/:22/:37/:52 lands more reliably than */15 would.
+    # ~15-min target, but GitHub throttling makes it best-effort (~30–60 min in
+    # practice) — see CONFIG.live.intervalMinutes. The guaranteed daily news
+    # scan is the Vercel cron /api/ingest/news (vercel.json), not this.
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch: {}
 permissions:
   contents: read
