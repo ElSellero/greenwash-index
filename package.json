@@ -32,7 +32,7 @@
     "next": "16.2.9",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "three": "^0.184.0",
+    "three": "^0.185.0",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
@@ -41,7 +41,7 @@
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/three": "^0.184.1",
+    "@types/three": "^0.185.0",
     "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
