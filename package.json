@@ -25,7 +25,7 @@
     "@neondatabase/serverless": "^1.1.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
-    "ai": "^6.0.209",
+    "ai": "^7.0.9",
     "drizzle-orm": "^0.45.2",
     "fast-xml-parser": "^5.9.3",
     "gsap": "^3.15.0",
