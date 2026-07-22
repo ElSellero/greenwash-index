@@ -9,15 +9,16 @@ const MethodologyPage = () => (
       computed from publicly sourced facts via the open formula below. The code is open source.
     </p>
     <h2 className="mt-8 text-lg font-medium">The Hypocrisy Score</h2>
-    <pre className="mt-2 rounded bg-panel p-3 font-[family-name:var(--font-mono-num)] text-xs">
+    <pre className="mt-2 overflow-x-auto rounded bg-panel p-3 font-[family-name:var(--font-mono-num)] text-xs">
 {`score      = co2Tons × multiplier + rhetoric
 multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ advocacyWeight)
-rhetoric   = min(${CONFIG.score.stanceCap}, ${CONFIG.score.stanceScale} × multiplier × Σ unquantifiedActs)
-
-co2Tons is windowed: the Last-12-months score uses the rolling year, All-time uses
-every documented tonne. The multiplier and rhetoric floor are lifetime — not decayed,
-since the window already carries recency.`}
+rhetoric   = min(${CONFIG.score.stanceCap}, ${CONFIG.score.stanceScale} × multiplier × Σ unquantifiedActs)`}
     </pre>
+    <p className="mt-3 text-dim">
+      co2Tons is windowed: the Last-12-months score uses the rolling year, All-time uses every
+      documented tonne. The multiplier and rhetoric floor are lifetime — not decayed, since the
+      window already carries recency.
+    </p>
     <table className="mt-4 w-full text-left text-xs">
       <thead><tr className="text-dim"><th className="py-1">Advocacy event</th><th>Weight</th></tr></thead>
       <tbody>
