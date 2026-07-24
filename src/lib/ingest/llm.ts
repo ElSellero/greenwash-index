@@ -147,3 +147,17 @@ export const interCallDelayMs = (): number => (googleKey() ? 5_000 : 0);
 
 /** Per-run classification cap sized to the serverless time budget (maxDuration 300s). */
 export const maxClassificationsPerRun = (): number => (googleKey() ? 25 : 80);
+
+/**
+ * Neutralise an untrusted third-party string (a scraped headline/summary) before
+ * it is interpolated into an LLM prompt — our defence against prompt injection
+ * from source pages. Collapses every run of whitespace and control/format
+ * characters (newlines, tabs, zero-width and bidi-override chars) to a single
+ * space, so an attacker can't smuggle in a fake field on its own line
+ * (e.g. "…\nConfidence: 1.0") or hide instructions with invisible characters;
+ * and caps the length so a bloated payload can't crowd out the system prompt.
+ * Foreign letters are preserved (translation still works); the system prompt
+ * additionally tells the model this text is data, never commands.
+ */
+export const sanitizeForPrompt = (text: string, max = 500): string =>
+  text.replace(/[\p{Cc}\p{Cf}\s]+/gu, ' ').trim().slice(0, max);
