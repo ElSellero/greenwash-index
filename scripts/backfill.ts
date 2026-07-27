@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../src/lib/db/client';
+import { withDbRetry } from '../src/lib/db/retry';
 import { persons, seenArticles } from '../src/lib/db/schema';
 import { parseGdelt, dedupeArticles, type Article } from '../src/lib/ingest/news';
 import { personNameQuery } from '../src/lib/ingest/personSearch';
@@ -52,7 +53,7 @@ const processArticle = async (p: { id: number; name: string }, article: Article)
 };
 
 const run = async () => {
-  const allPersons = await db.select().from(persons);
+  const allPersons = await withDbRetry(() => db.select().from(persons), 'persons');
   for (const p of allPersons) {
     console.log(`\n=== ${p.name} ===`);
     let articles: Article[] = [];
