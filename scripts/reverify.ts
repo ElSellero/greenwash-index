@@ -1,5 +1,6 @@
 import { eq, like } from 'drizzle-orm';
 import { db } from '../src/lib/db/client';
+import { withDbRetry } from '../src/lib/db/retry';
 import { events, persons } from '../src/lib/db/schema';
 import { runClassification, passesGuardrails, advocacyWeightFor } from '../src/lib/ingest/classify';
 import { interCallDelayMs } from '../src/lib/ingest/llm';
@@ -23,7 +24,7 @@ import { interCallDelayMs } from '../src/lib/ingest/llm';
 const apply = process.argv.includes('--apply');
 
 const run = async () => {
-  const rows = await db.select({
+  const rows = await withDbRetry(() => db.select({
     id: events.id,
     personName: persons.name,
     kind: events.kind,
@@ -34,7 +35,7 @@ const run = async () => {
     classifier: events.classifier,
   }).from(events)
     .innerJoin(persons, eq(persons.id, events.personId))
-    .where(like(events.classifier, 'ollama%'));
+    .where(like(events.classifier, 'ollama%')), 'ollama events');
 
   console.log(`${rows.length} Ollama-classified events to re-verify with Gemini.\n`);
   let upgraded = 0;
