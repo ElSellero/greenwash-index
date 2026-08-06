@@ -6,20 +6,24 @@ name: retry-infra-failures
 # and the Actions tab shows a red X (hit backfill on 2026-07-09, and
 # live-ingest + ais-sample on 2026-08-06 during a GitHub-wide Actions outage).
 #
-# Retry policy — stay silent until we have actually given up:
-#   attempts 1-5 fail -> retried automatically, no mail. Backoff grows 2/4/6/8/10
-#                        min, and each runner-acquisition failure burns ~15 min
-#                        of its own, so the chain spans ~1.5h — long enough to
-#                        outlast a typical Actions blip.
-#   attempt 6 fails   -> file an issue. That is the one and only notification.
+# Retry policy:
+#   attempts 1-5 fail -> retried automatically. Backoff grows 2/4/6/8/10 min, and
+#                        each runner-acquisition failure burns ~15 min of its own,
+#                        so the chain spans ~1.5h — long enough to outlast a
+#                        typical Actions blip.
+#   attempt 6 fails   -> file an issue, assigned to the owner.
 #   every following day -> the sweep re-runs everything still red from the last
 #                        25h (the stragglers AND whatever failed since), and
 #                        comments on the same issue rather than opening a new one.
 #
-# NOTE: GitHub's own "workflow run failed" mail is separate and fires on every
-# single attempt. Turn it off under github.com/settings/notifications -> Actions
-# (uncheck Email), otherwise attempts 1-5 still land in the inbox and this whole
-# escalation buys nothing.
+# On notifications: GitHub's own "workflow run failed" mail is a global per-user
+# setting with no per-repo override, and it fires on every single attempt — so a
+# bad afternoon costs up to 6 near-identical mails. Left switched on deliberately
+# (2026-08-06): the other repos on this account only build on push/PR, where that
+# mail is the only unattended-failure signal, and switching it off would have cost
+# them that. The issue below is what makes the give-up moment distinguishable from
+# the five look-alike mails that precede it, and it keeps one deduped thread per
+# broken workflow instead of a fresh alert every day.
 on:
   workflow_run:
     workflows: [live-ingest, ais-sample, backfill]
