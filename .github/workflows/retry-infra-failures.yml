@@ -1,0 +1,130 @@
+name: retry-infra-failures
+# Scheduled jobs occasionally die before a single line of our code runs, with
+# "The job was not acquired by Runner of type hosted even after multiple
+# attempts" — GitHub could not hand out a runner and the queued job timed out
+# after ~15 min. Nothing is wrong with the workflow; the tick is simply lost
+# and the Actions tab shows a red X (hit backfill on 2026-07-09, and
+# live-ingest + ais-sample on 2026-08-06 during a GitHub-wide Actions outage).
+#
+# Retry policy — stay silent until we have actually given up:
+#   attempts 1-5 fail -> retried automatically, no mail. Backoff grows 2/4/6/8/10
+#                        min, and each runner-acquisition failure burns ~15 min
+#                        of its own, so the chain spans ~1.5h — long enough to
+#                        outlast a typical Actions blip.
+#   attempt 6 fails   -> file an issue. That is the one and only notification.
+#   every following day -> the sweep re-runs everything still red from the last
+#                        25h (the stragglers AND whatever failed since), and
+#                        comments on the same issue rather than opening a new one.
+#
+# NOTE: GitHub's own "workflow run failed" mail is separate and fires on every
+# single attempt. Turn it off under github.com/settings/notifications -> Actions
+# (uncheck Email), otherwise attempts 1-5 still land in the inbox and this whole
+# escalation buys nothing.
+on:
+  workflow_run:
+    workflows: [live-ingest, ais-sample, backfill]
+    types: [completed]
+  schedule:
+    # daily sweep, off-peak minute; late enough that a morning outage has passed
+    - cron: '17 6 * * *'
+  workflow_dispatch: {}
+permissions: {}
+# The attempt cap lives as a literal 6 in the two job conditions below (original
+# run + 5 retries) — job-level `if:` cannot read the `env` context, so a named
+# variable here would look like a knob without being one. Change both together.
+jobs:
+  retry:
+    # run_attempt is the loop guard: every rerun completes as the next attempt
+    # and re-enters here, so the chain walks 1->6 and then falls through to the
+    # notify job. Deliberately retries any failure, not just runner-acquisition
+    # ones — all three targets are safe to repeat (live-ingest and backfill dedup
+    # via seen_articles, ais-sample just takes another 60s AIS sample).
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt < 6 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: write
+    steps:
+      - name: Re-run failed jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: |
+          # escalating backoff: 2, 4, 6, 8, 10 min before retries 1..5
+          echo "attempt $RUN_ATTEMPT failed; backing off $((RUN_ATTEMPT * 2)) min"
+          sleep $((RUN_ATTEMPT * 120))
+          # --failed retries only the broken jobs; fall back to a full re-run
+          gh run rerun "$RUN_ID" --failed || gh run rerun "$RUN_ID"
+
+  sweep:
+    # Second wind a day later, for the case the retry chain itself ran into the
+    # outage (this workflow needs a runner too). Takes everything still red from
+    # the last 25h — the stragglers as well as runs that failed since — and
+    # kicks them once more.
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: write
+    steps:
+      - name: Re-run everything still failing from the last day
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # 25h overlaps the 24h cadence slightly so nothing slips between sweeps
+          CUTOFF=$(date -u -d '25 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          echo "re-running failed runs created since $CUTOFF"
+          for wf in live-ingest.yml ais.yml backfill.yml; do
+            ids=$(gh run list --workflow "$wf" --status failure \
+              --created ">=$CUTOFF" --limit 50 --json databaseId --jq '.[].databaseId')
+            for id in $ids; do
+              echo "  $wf -> re-running run $id"
+              gh run rerun "$id" --failed || gh run rerun "$id" || true
+            done
+          done
+
+  notify:
+    # The escalation. Only reached once a run has burned all its retries, so an
+    # issue here means the failure outlived a ~1.5h retry chain and is worth a
+    # human look. Assigned on purpose — assignment is what makes GitHub mail.
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt >= 6 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      issues: write
+    steps:
+      - name: File an issue — this is the one notification we want
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          # passed via env, never inlined into the script: workflow-run fields
+          # are attacker-influenceable in general and must not be executed
+          WF_NAME: ${{ github.event.workflow_run.name }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          ATTEMPTS: ${{ github.event.workflow_run.run_attempt }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          gh label create ci-failure --color B60205 \
+            --description "Scheduled job failed every retry" 2>/dev/null || true
+
+          TITLE="CI: $WF_NAME failing after every retry"
+          BODY=$(printf '%s\n' \
+            "\`$WF_NAME\` has now failed $ATTEMPTS times — the original run plus every automatic retry." \
+            "" \
+            "Last run: $RUN_URL" \
+            "" \
+            "If that run has no logs and the annotation reads \"The job was not acquired by Runner of type hosted\", it is still GitHub-side capacity, not our code — check githubstatus.com before digging in. The daily sweep keeps retrying and will comment here again while it stays red." \
+            "" \
+            "_Filed automatically by \`retry-infra-failures\`._")
+
+          EXISTING=$(gh issue list --state open --label ci-failure --json number,title \
+            --jq ".[] | select(.title == \"$TITLE\") | .number" | head -1)
+
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY" \
+              --label ci-failure --assignee "$OWNER"
+          fi

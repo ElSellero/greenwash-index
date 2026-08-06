@@ -13,6 +13,9 @@ permissions:
 jobs:
   tick:
     runs-on: ubuntu-latest
+    # the curl already caps itself at 110s; this just stops a wedged job from
+    # sitting on a runner for the default 6h
+    timeout-minutes: 5
     steps:
       - name: Trigger live ingest
         run: |
