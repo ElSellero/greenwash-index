@@ -1,4 +1,5 @@
 import { formatCo2Kg } from '@/lib/format';
+import { VehicleGlyph } from '@/components/ui/VehicleGlyph';
 
 export type Vehicle = { type: string; name: string };
 
@@ -8,8 +9,6 @@ type Props = {
   vehicles: Vehicle[];
   jetCo2Kg: number;
   yachtCo2Kg: number;
-  /** 'full' = labelled rows (popup / detail); 'compact' = one tight line (list). */
-  variant?: 'full' | 'compact';
   /** Popup only: aim the globe at this vehicle type. Rows become clickable buttons. */
   onSelectType?: (type: VehicleType) => void;
   /** Types that have a live position to fly to — only these rows are made clickable. */
@@ -32,11 +31,11 @@ const LocateIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const RowLabel = ({ icon, label, vs }: { icon: string; label: string; vs: Vehicle[] }) => (
-  <span className="min-w-0 flex-1 truncate">
-    <span aria-hidden className="mr-1">{icon}</span>
-    <span className="text-[9px] font-semibold uppercase tracking-wider text-dim">{label} </span>
-    <span className="text-slate-300">{names(vs)}</span>
+const RowLabel = ({ type, label, vs }: { type: VehicleType; label: string; vs: Vehicle[] }) => (
+  <span className="flex min-w-0 flex-1 items-center gap-1.5">
+    <VehicleGlyph type={type} />
+    <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-dim">{label}</span>
+    <span className="min-w-0 truncate text-slate-300">{names(vs)}</span>
   </span>
 );
 
@@ -46,14 +45,14 @@ const RowCo2 = ({ co2 }: { co2: number }) => (
   </span>
 );
 
-const FleetRow = ({ icon, label, vs, co2, onSelect, active }: {
-  icon: string; label: string; vs: Vehicle[]; co2: number;
+const FleetRow = ({ type, label, vs, co2, onSelect, active }: {
+  type: VehicleType; label: string; vs: Vehicle[]; co2: number;
   onSelect?: () => void; active?: boolean;
 }) => {
   if (!onSelect) {
     return (
       <div className="flex items-baseline justify-between gap-3">
-        <RowLabel icon={icon} label={label} vs={vs} />
+        <RowLabel type={type} label={label} vs={vs} />
         <RowCo2 co2={co2} />
       </div>
     );
@@ -70,7 +69,7 @@ const FleetRow = ({ icon, label, vs, co2, onSelect, active }: {
           ? 'bg-accent/10 ring-accent/40'
           : 'bg-white/[0.03] ring-white/[0.06] hover:bg-white/10 hover:ring-white/15'}`}
     >
-      <RowLabel icon={icon} label={label} vs={vs} />
+      <RowLabel type={type} label={label} vs={vs} />
       <span className="flex shrink-0 items-center gap-1.5">
         <RowCo2 co2={co2} />
         <LocateIcon className={`shrink-0 transition-transform group-hover:scale-110 ${
@@ -86,28 +85,12 @@ const FleetRow = ({ icon, label, vs, co2, onSelect, active }: {
  * (assets / advocacy don't show here). Renders nothing if there are no vehicles.
  */
 export const VehicleEmissions = ({
-  vehicles, jetCo2Kg, yachtCo2Kg, variant = 'full',
+  vehicles, jetCo2Kg, yachtCo2Kg,
   onSelectType, selectableTypes, activeType,
 }: Props) => {
   const jets = vehicles.filter((v) => v.type === 'jet');
   const yachts = vehicles.filter((v) => v.type === 'yacht');
   if (jets.length === 0 && yachts.length === 0) return null;
-
-  if (variant === 'compact') {
-    return (
-      <p className="truncate text-[11px] text-dim">
-        {jets.length > 0 && (
-          <span>✈ <span className="text-slate-300">{names(jets)}</span>
-            {jetCo2Kg > 0 && <span className="text-neg"> {formatCo2Kg(jetCo2Kg)}</span>}</span>
-        )}
-        {jets.length > 0 && yachts.length > 0 && <span className="text-panel-edge"> · </span>}
-        {yachts.length > 0 && (
-          <span>🛥 <span className="text-slate-300">{names(yachts)}</span>
-            {yachtCo2Kg > 0 && <span className="text-neg"> {formatCo2Kg(yachtCo2Kg)}</span>}</span>
-        )}
-      </p>
-    );
-  }
 
   const rowProps = (type: VehicleType) =>
     onSelectType && selectableTypes?.includes(type)
@@ -116,8 +99,8 @@ export const VehicleEmissions = ({
 
   return (
     <div className="space-y-1.5 text-sm">
-      {jets.length > 0 && <FleetRow icon="✈" label="Jet" vs={jets} co2={jetCo2Kg} {...rowProps('jet')} />}
-      {yachts.length > 0 && <FleetRow icon="🛥" label="Yacht" vs={yachts} co2={yachtCo2Kg} {...rowProps('yacht')} />}
+      {jets.length > 0 && <FleetRow type="jet" label="Jet" vs={jets} co2={jetCo2Kg} {...rowProps('jet')} />}
+      {yachts.length > 0 && <FleetRow type="yacht" label="Yacht" vs={yachts} co2={yachtCo2Kg} {...rowProps('yacht')} />}
     </div>
   );
 };

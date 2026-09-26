@@ -23,6 +23,8 @@ Implemented in `src/app/globals.css` as Tailwind v4 `@theme` tokens:
 | `--color-neg` | `#ff3b5c` | neon red — emissions, "exhaust" |
 | `--color-accent` | `#38bdf8` | cyan — links, focus, interactive highlights |
 | `--color-dim` | `#7d8db1` | secondary text |
+| `--color-jet` | `#38bdf8` | jets on the globe, their flight paths and legend |
+| `--color-yacht` | `#e879f9` | yachts on the globe, their sea routes and legend (kept apart from `--color-pos`, which means advocacy) |
 
 Body text color: `#e2e8f0`. Amber for simulated/unverified badges: use Tailwind `amber-400`.
 

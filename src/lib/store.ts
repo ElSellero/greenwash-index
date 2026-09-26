@@ -12,6 +12,10 @@ type SelectionState = {
   setSearch: (q: string) => void;
   rankMode: '12m' | 'all'; // leaderboard window: rolling 12 months vs all-time
   setRankMode: (m: '12m' | 'all') => void;
+  hdImagery: boolean; // stream sharp imagery tiles early and one level finer, persisted
+  setHdImagery: (on: boolean) => void;
+  autoSpin: boolean; // idle globe rotation, persisted
+  setAutoSpin: (on: boolean) => void;
 };
 
 export const useAppStore = create<SelectionState>()(
@@ -32,10 +36,14 @@ export const useAppStore = create<SelectionState>()(
       setSearch: (q) => set({ search: q }),
       rankMode: 'all', // default to all-time: differentiated scores (12m is mostly 0 until recent trips accrue)
       setRankMode: (m) => set({ rankMode: m }),
+      hdImagery: false,
+      setHdImagery: (on) => set({ hdImagery: on }),
+      autoSpin: true,
+      setAutoSpin: (on) => set({ autoSpin: on }),
     }),
     {
       name: 'greenwash-index', // localStorage key — functional only, no consent needed
-      partialize: (s) => ({ favorites: s.favorites }),
+      partialize: (s) => ({ favorites: s.favorites, hdImagery: s.hdImagery, autoSpin: s.autoSpin }),
     },
   ),
 );

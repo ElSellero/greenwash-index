@@ -4,7 +4,7 @@ import { events, positions, scoreSnapshots, trips, vehicles, persons } from '@/l
 import { getTopNPersonIds, getVehiclesForPersons } from '@/lib/db/queries';
 import { fetchJetStates } from './adsb';
 import { nextTripState, type TripState } from './trips';
-import { yachtPositionAt } from './yachtSim';
+import { simulatedPosition } from './yachtSim';
 import { tripCo2Kg, co2RatePerSecond } from '@/lib/score/co2';
 import { advocacyMultiplier, hypocrisyScore, rankPersons, stanceScore, type StanceEvent } from '@/lib/score/hypocrisy';
 import { CONFIG } from '@/config';
@@ -143,10 +143,8 @@ export const runLiveIngest = async (now = new Date()) => {
     await recordObservation(jet, { ...s, lng: s.lng, isMoving: s.isAirborne }, 'adsb', now);
   }
   for (const v of simulated) {
-    const p = v.type === 'yacht'
-      ? yachtPositionAt(v.id, now)
-      : { ...yachtPositionAt(v.id + 100_000, now), isMoving: false }; // unverified jets: parked, no fake flights
-    await recordObservation(v, { lat: p.lat, lng: p.lng, isMoving: v.type === 'yacht' && p.isMoving, heading: p.heading, altitudeM: null }, 'sim', now);
+    const p = simulatedPosition(v, now);
+    await recordObservation(v, { lat: p.lat, lng: p.lng, isMoving: p.isMoving, heading: p.heading, altitudeM: null }, 'sim', now);
   }
   // keep the leaderboard fresh between daily runs (reflects the growing backfill)
   const scored = await recomputeScores(now);
@@ -165,8 +163,8 @@ export const runDailyPipeline = async (now = new Date()) => {
     if (s) await recordObservation(jet, { ...s, isMoving: s.isAirborne }, 'adsb', now);
   }
   for (const v of allVehicles.filter((x) => x.trackingMode === 'simulated')) {
-    const p = yachtPositionAt(v.id, now);
-    await recordObservation(v, { lat: p.lat, lng: p.lng, isMoving: v.type === 'yacht' && p.isMoving, heading: p.heading, altitudeM: null }, 'sim', now);
+    const p = simulatedPosition(v, now);
+    await recordObservation(v, { lat: p.lat, lng: p.lng, isMoving: p.isMoving, heading: p.heading, altitudeM: null }, 'sim', now);
   }
 
   // 2) re-aggregate all score snapshots from current events

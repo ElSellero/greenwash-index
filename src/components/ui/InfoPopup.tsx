@@ -1,7 +1,9 @@
 'use client';
 import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
-import type { LeaderboardEntry, PositionsPayload } from '@/lib/api-types';
+import type { LeaderboardEntry } from '@/lib/api-types';
+import { focusedVehicle, type GlobeVehicle } from '@/lib/globe/fleet';
+import { describeActivity, describeLocation } from '@/lib/globe/status';
 import { Co2Ticker } from './Co2Ticker';
 import { SourceBadge } from './SourceBadge';
 import { VehicleEmissions } from '@/components/person/VehicleEmissions';
@@ -10,9 +12,16 @@ import { shouldDismiss } from '@/lib/sheet';
 import { allTimeScore } from '@/lib/score/hypocrisy';
 import { formatCo2Kg } from '@/lib/format';
 
+const PinIcon = () => (
+  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"
+    strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mt-0.5 shrink-0 text-dim">
+    <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z" /><circle cx="12" cy="9.5" r="2.5" />
+  </svg>
+);
+
 export const InfoPopup = ({ entries, positions }: {
   entries: LeaderboardEntry[];
-  positions: PositionsPayload['positions'];
+  positions: GlobeVehicle[];
 }) => {
   const selectedPersonId = useAppStore((s) => s.selectedPersonId);
   const selectedVehicleId = useAppStore((s) => s.selectedVehicleId);
@@ -30,8 +39,7 @@ export const InfoPopup = ({ entries, positions }: {
       .findIndex((e) => e.personId === entry.personId) + 1;
   }, [entries, rankMode, entry]);
   if (!entry) return null;
-  const vehicle = positions.find((p) => p.vehicleId === selectedVehicleId)
-    ?? positions.find((p) => p.personId === selectedPersonId);
+  const vehicle = focusedVehicle(positions, selectedPersonId, selectedVehicleId);
 
   // Fleet rows are clickable to aim the globe. Pick a representative position per
   // vehicle type for this person, preferring one that's currently en route.
@@ -68,11 +76,20 @@ export const InfoPopup = ({ entries, positions }: {
       </p>
       <h2 className="text-lg font-semibold">{entry.name}</h2>
       {vehicle && (
-        <p className="mt-1 flex items-center gap-2 text-xs text-dim">
-          {vehicle.vehicleName}
-          <SourceBadge kind={vehicle.source === 'adsb' ? 'adsb' : 'sim'} />
-          {vehicle.isMoving && <span className="text-accent">● en route</span>}
-        </p>
+        <div className="mt-1 text-xs text-dim">
+          <p className="flex items-center gap-2">
+            {vehicle.vehicleName}
+            <SourceBadge kind={vehicle.source === 'adsb' || vehicle.source === 'ais' ? vehicle.source : 'sim'} />
+          </p>
+          <p className={`mt-0.5 font-num text-[10px] uppercase tracking-wider ${
+            vehicle.status === 'moving' ? 'text-accent' : 'text-dim'}`}>
+            {vehicle.status === 'moving' && '● '}{describeActivity(vehicle)}
+          </p>
+          <p className="mt-1 flex items-start gap-1.5 text-[11px] leading-4 text-slate-400">
+            <PinIcon />
+            <span>{describeLocation(vehicle, new Date())}</span>
+          </p>
+        </div>
       )}
       <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
         <div>
