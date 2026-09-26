@@ -9,6 +9,8 @@
   --color-neg: #ff3b5c;          /* negative / red */
   --color-accent: #38bdf8;       /* cyan highlights, routes */
   --color-dim: #7d8db1;          /* secondary text */
+  --color-jet: #38bdf8;          /* jets on the globe */
+  --color-yacht: #e879f9;        /* yachts on the globe */
   --font-sans: var(--font-fira-sans), system-ui, sans-serif;
   --font-mono-num: var(--font-fira-code), ui-monospace, monospace;
 }

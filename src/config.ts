@@ -76,8 +76,10 @@ export const CONFIG = {
   },
   globe: {
     radius: 1,
-    markerAltitude: 1.01,
-    arcSegments: 64,
+    /** Radii (globe = 1) — exaggerated so heights read at globe scale. */
+    surfaceAltitude: 1.0035,
+    flightAltitude: 1.035,
+    trailAltitude: 1.0015,
   },
 } as const;
 
