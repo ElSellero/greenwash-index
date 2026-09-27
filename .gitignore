@@ -11,7 +11,7 @@
 # testing
 /coverage
 
-# env files — secrets never enter git
+# env files - secrets never enter git
 .env
 .env.*
 !.env.example
@@ -40,7 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local agent tooling — personal dev setup, not part of the app
+# local agent tooling - personal dev setup, not part of the app
 .claude/
 .agents/
 skills-lock.json

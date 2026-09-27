@@ -55,7 +55,7 @@ export const recordObservation = async (
         personId: vehicle.personId,
         kind: 'negative',
         type: isJet ? 'flight' : 'yacht_trip',
-        title: `${isJet ? 'Flight' : 'Yacht trip'} — ${Math.round(transition.totalKm)} km (${vehicle.name})`,
+        title: `${isJet ? 'Flight' : 'Yacht trip'} - ${Math.round(transition.totalKm)} km (${vehicle.name})`,
         description: source === 'sim'
           ? 'Simulated voyage (estimated, see methodology).'
           : source === 'ais'
@@ -77,7 +77,7 @@ export const recordObservation = async (
 /**
  * Re-aggregate every person's score snapshot for today from current events.
  * Idempotent: replaces today's rows, so it can run frequently (live tick) without
- * piling up duplicate snapshots. Cheap — pure DB aggregation, no external calls.
+ * piling up duplicate snapshots. Cheap - pure DB aggregation, no external calls.
  */
 export const recomputeScores = async (now = new Date()): Promise<number> => {
   const allPersons = await db.select().from(persons);
@@ -104,7 +104,7 @@ export const recomputeScores = async (now = new Date()): Promise<number> => {
     // echo/repeat events carry weightFactor < 1 so repetition can't inflate the score
     const m = advocacyMultiplier(advocacy.map((a) => ({ weight: (a.weight ?? 1) * (a.weightFactor ?? 1) })));
     // rhetoric floor: ONLY documented "what they do" acts without a CO2 figure, amplified
-    // by the advocacy multiplier (talk × deeds). Positive advocacy alone never scores — a
+    // by the advocacy multiplier (talk × deeds). Positive advocacy alone never scores - a
     // consistent climate advocate with no documented high-emission act stays at zero.
     const stancePts: StanceEvent[] = negUnquantified.map(() => ({ points: CONFIG.score.negStanceUnit }));
     const stance = stanceScore(stancePts, m);

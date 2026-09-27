@@ -10,7 +10,7 @@ export const ScoreBreakdown = ({ snapshot }: { snapshot: NonNullable<PersonDetai
   const allTimeScore = (snapshot.co2KgTotal / 1000) * snapshot.multiplier + stance;
   return (
     <div className="rounded-xl border border-panel-edge bg-panel p-4">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-dim">Hypocrisy Score — full math, no magic</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-dim">Hypocrisy Score - full math, no magic</p>
       <dl className="mt-3 space-y-2 font-[family-name:var(--font-mono-num)] tabular-nums">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           <dt className="text-[10px] uppercase tracking-[0.15em] text-dim">All-time</dt>
@@ -35,7 +35,7 @@ export const ScoreBreakdown = ({ snapshot }: { snapshot: NonNullable<PersonDetai
         Documented CO2 (tonnes) × advocacy multiplier (1–10, lifetime). Reported flights
         &amp; yacht trips get a conservative <b className="text-slate-300">estimated</b>{' '}tonnage from the
         person&apos;s known jet/yacht; a small <b className="text-slate-300">rhetoric floor</b>{' '}adds documented
-        ownership (a jet, yacht or mansion) we can&apos;t turn into a trip, amplified by that multiplier — so
+        ownership (a jet, yacht or mansion) we can&apos;t turn into a trip, amplified by that multiplier - so
         green-talk-plus-untracked-exhaust isn&apos;t a flat zero. <b className="text-slate-300">Advocacy alone
         never scores</b>: a consistent climate advocate with no such act stays at zero.
         <b className="text-slate-300"> All-time</b>{' '}counts every documented tonne (incl. cited reports);

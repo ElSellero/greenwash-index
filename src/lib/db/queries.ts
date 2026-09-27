@@ -3,7 +3,7 @@ import { db } from './client';
 import { events, persons, positions, scoreSnapshots, trips, vehicles } from './schema';
 import { allTimeScore } from '@/lib/score/hypocrisy';
 
-/** Latest snapshot per person joined with person — the leaderboard. */
+/** Latest snapshot per person joined with person - the leaderboard. */
 export const getLeaderboard = async () => {
   const latest = db.$with('latest').as(
     db.select({
@@ -64,7 +64,7 @@ export const getPersonDetail = async (slug: string) => {
       .orderBy(desc(scoreSnapshots.snapshotDate)).limit(1),
     getLeaderboard(),
   ]);
-  // all-time rank (lifetime CO2 × multiplier) — matches the leaderboard's all-time view
+  // all-time rank (lifetime CO2 × multiplier) - matches the leaderboard's all-time view
   const allTimeRank = [...board]
     .sort((a, b) => allTimeScore(b) - allTimeScore(a))
     .findIndex((e) => e.personId === person.id) + 1 || null;

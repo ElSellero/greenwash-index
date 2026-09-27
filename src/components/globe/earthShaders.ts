@@ -59,7 +59,7 @@ export const EARTH_FRAG = /* glsl */ `
     float water = texture2D(uWater, vGlobalUv).r;
     #ifdef TILE
       // NASA tiles are graded far darker than the base map: lift land with a soft, non-clipping curve and
-      // repaint open sea — detected per tile pixel (near-black, blue-dominant) so coasts stay crisp — in the
+      // repaint open sea - detected per tile pixel (near-black, blue-dominant) so coasts stay crisp - in the
       // base map's deep-ocean blue.
       vec3 s = pow(albedo, vec3(1.0 / 2.2));
       float peak = max(s.r, max(s.g, s.b));

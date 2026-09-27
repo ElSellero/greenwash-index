@@ -3,7 +3,7 @@ import { db } from '../src/lib/db/client';
 import { persons } from '../src/lib/db/schema';
 
 /**
- * Populate neutral, factual one-line bios (public role only — no editorial
+ * Populate neutral, factual one-line bios (public role only - no editorial
  * judgment, so nothing that needs media-law review; the sourced events carry
  * the satire). Idempotent. Dry-run by default; --apply writes.
  */
@@ -72,7 +72,7 @@ const run = async () => {
     if (apply) await db.update(persons).set({ bio }).where(eq(persons.slug, slug));
     written++;
   }
-  console.log(`\n${apply ? 'APPLIED' : 'DRY RUN'} — ${written} bios${missing ? `, ${missing} roster slugs without a bio` : ''}.`);
+  console.log(`\n${apply ? 'APPLIED' : 'DRY RUN'} - ${written} bios${missing ? `, ${missing} roster slugs without a bio` : ''}.`);
   if (!apply) console.log('Re-run with --apply to write.');
 };
 

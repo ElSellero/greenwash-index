@@ -29,7 +29,7 @@ const PrivacyPage = () => (
     <DocSection id="imagery" index={2} title="Satellite imagery">
       <p>
         When you zoom in, sharper satellite tiles (NASA Blue Marble and Earth at Night) are loaded for the visible
-        area. Our own server fetches them from NASA&apos;s imagery service and delivers them from this domain — your
+        area. Our own server fetches them from NASA&apos;s imagery service and delivers them from this domain - your
         browser never contacts NASA, and no data about you is passed on.
       </p>
     </DocSection>
@@ -46,7 +46,7 @@ const PrivacyPage = () => (
     <DocSection id="donations" index={4} title="External donation links">
       <p>
         The support banner contains plain links to external donation platforms (Ko-fi, GitHub Sponsors). No
-        scripts, cookies or data transfers from these platforms occur on this site — their privacy policies apply
+        scripts, cookies or data transfers from these platforms occur on this site - their privacy policies apply
         only once you follow a link and visit them.
       </p>
     </DocSection>
@@ -68,7 +68,7 @@ const PrivacyPage = () => (
         </>
       ) : (
         <p>
-          Advertising is currently <b>not active</b>. This site sets no advertising or tracking cookies whatsoever —
+          Advertising is currently <b>not active</b>. This site sets no advertising or tracking cookies whatsoever -
           there is nothing to consent to. If advertising is activated in the future, Google&apos;s certified consent
           management platform (TCF 2.2) will ask for your explicit consent before any ad cookies are set, and this
           section will offer a control to change your choice at any time.
@@ -82,7 +82,7 @@ const PrivacyPage = () => (
         positions, and sourced news events) for a satirical, journalistic-editorial purpose. This processing relies
         on the media privilege (Art. 85 GDPR in conjunction with the applicable German press/media law) and our
         legitimate interest in public-interest reporting (Art. 6(1)(f) GDPR). Every claim links to its source.
-        Featured persons may request rectification or removal of any event whose source does not support it — see
+        Featured persons may request rectification or removal of any event whose source does not support it - see
         the <a href="/methodology" className={link}>methodology</a>{' '}and the contact in the{' '}
         <a href="/imprint" className={link}>imprint</a>; substantiated requests are honored promptly.
       </p>

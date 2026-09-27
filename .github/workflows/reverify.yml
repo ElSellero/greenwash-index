@@ -1,6 +1,6 @@
 name: reverify
 on:
-  # Always reverify, but only AFTER backfill has finished — never concurrently
+  # Always reverify, but only AFTER backfill has finished - never concurrently
   # (they share the one Gemini free-tier daily quota). workflow_run chains this
   # right after each backfill run completes; it's self-regulating: reverify is
   # Gemini-only and non-destructive (rejects are neutralized to weight 0, never
@@ -19,7 +19,7 @@ jobs:
   reverify:
     # manual dispatch always runs. For the chained run: backfill is resumable and
     # almost always hits its 350-min timeout (conclusion 'cancelled') rather than
-    # finishing 'success', so treat 'cancelled' as a normal end too — otherwise the
+    # finishing 'success', so treat 'cancelled' as a normal end too - otherwise the
     # reverify never fires. Only a genuine 'failure' is skipped.
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'cancelled' }}
     runs-on: ubuntu-latest

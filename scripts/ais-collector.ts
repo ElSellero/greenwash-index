@@ -11,7 +11,7 @@ import { recordObservation } from '../src/lib/ingest/pipeline';
  * latest position per vessel, and every FLUSH_MS feeds it through the same
  * recordObservation trip/CO2 pipeline the jets use. Long-running + self-
  * reconnecting; run detached like the backfill supervisor. AIS is realtime
- * only (no history) and superyachts often switch AIS off — coverage is sparse.
+ * only (no history) and superyachts often switch AIS off - coverage is sparse.
  */
 const FLUSH_MS = 5 * 60_000;
 const ENDPOINT = 'wss://stream.aisstream.io/v0/stream';
@@ -82,7 +82,7 @@ const connect = (mmsis: string[]) => {
   });
   ws.on('close', () => {
     if (shuttingDown) return; // intentional close at the end of a one-shot sample
-    console.log('ws closed — reconnecting in 5s');
+    console.log('ws closed - reconnecting in 5s');
     setTimeout(() => connect(mmsis), 5_000);
   });
   ws.on('error', (e: Error) => { console.log(`ws error: ${e.message}`); try { ws?.close(); } catch { /* noop */ } });
@@ -93,7 +93,7 @@ const main = async () => {
   // a transient Neon blip here would otherwise fail the whole scheduled sample
   const yachts = await withDbRetry(() => db.select().from(vehicles)
     .where(and(eq(vehicles.type, 'yacht'), isNotNull(vehicles.mmsi))), 'yacht fleet');
-  if (yachts.length === 0) { console.error('no yachts with an mmsi — populate vehicles.mmsi first'); process.exit(1); }
+  if (yachts.length === 0) { console.error('no yachts with an mmsi - populate vehicles.mmsi first'); process.exit(1); }
   byMmsi = new Map(yachts.map((v) => [String(v.mmsi), v]));
   console.log(`tracking ${yachts.length} yachts: ${yachts.map((v) => `${v.name}(${v.mmsi})`).join(', ')}`);
   connect([...byMmsi.keys()]);

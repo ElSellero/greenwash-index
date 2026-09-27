@@ -14,7 +14,7 @@ type Controls = { enabled: boolean; rotateSpeed: number };
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
 /**
- * Replaces OrbitControls' step zoom (one fixed jump per wheel event — frantic on trackpads) with an eased,
+ * Replaces OrbitControls' step zoom (one fixed jump per wheel event - frantic on trackpads) with an eased,
  * altitude-relative zoom for wheel and pinch, and slows dragging as the camera nears the surface.
  */
 export const SmoothZoom = ({ minDistance, maxDistance, restDistance }: {

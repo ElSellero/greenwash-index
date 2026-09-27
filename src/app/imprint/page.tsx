@@ -3,7 +3,7 @@ import { DocPage, DocSection } from '@/components/doc/DocPage';
 import { ImprintDetails } from './ImprintDetails';
 
 export const metadata: Metadata = {
-  title: 'Imprint — Greenwash Index',
+  title: 'Imprint - Greenwash Index',
   robots: { index: false, follow: false },
 };
 
@@ -17,7 +17,7 @@ const ImprintPage = () => (
       <p>
         The Greenwash Index is satire and editorial commentary on persons of public interest. Hypocrisy scores
         and rankings are value judgments produced by the open formula on the{' '}
-        <a href="/methodology" className="text-accent hover:underline">methodology</a>{' '}page — opinions, not
+        <a href="/methodology" className="text-accent hover:underline">methodology</a>{' '}page - opinions, not
         statements of fact. Factual claims (flights, voyages, public statements) link to their public sources;
         simulated data is labelled <i>simulated</i>{' '}and never presented as fact. None of the persons listed has
         endorsed, sponsored or been consulted for this project.

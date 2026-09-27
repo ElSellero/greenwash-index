@@ -39,7 +39,7 @@ export const DonationBanner = () => {
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-40 flex justify-center">
       <div className="pointer-events-auto mx-2 mt-2 flex items-center gap-3 rounded-full border border-panel-edge bg-panel/90 px-4 py-1.5 text-xs shadow-lg backdrop-blur">
-        <span className="hidden text-dim sm:inline">Keep the radar spinning — fuel us with coffee, not kerosene:</span>
+        <span className="hidden text-dim sm:inline">Keep the radar spinning - fuel us with coffee, not kerosene:</span>
         <span className="text-dim sm:hidden">Support this project:</span>
         {KOFI && (
           <a href={`https://ko-fi.com/${KOFI}`} target="_blank" rel="noopener noreferrer"

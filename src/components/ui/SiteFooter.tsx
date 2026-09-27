@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 /**
  * Floating legal/footer links. On the homepage the mobile bottom sheet already
  * carries these links (see Sidebar), and the chip would collide with the sheet's
- * toggle — so hide it there on mobile; show everywhere else (and on desktop).
+ * toggle - so hide it there on mobile; show everywhere else (and on desktop).
  */
 export const SiteFooter = () => {
   const onHome = usePathname() === '/';

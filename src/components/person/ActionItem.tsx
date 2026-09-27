@@ -43,7 +43,7 @@ export const ActionItem = ({ event }: { event: PersonDetail['events'][number] })
           {event.advocacyWeight != null && (
             <span className="text-pos"
               title={isEcho
-                ? 'Repeat mention — down-weighted in the hypocrisy multiplier'
+                ? 'Repeat mention - down-weighted in the hypocrisy multiplier'
                 : 'Advocacy weight feeding the hypocrisy multiplier'}>
               +{event.advocacyWeight} advocacy{isEcho ? ' · echo' : ''}
             </span>

@@ -22,7 +22,7 @@ const Switch = ({ label, hint, checked, onChange }: {
   </button>
 );
 
-/** Desktop-only key for the globe — what the marks, lines and ghosts mean — plus remembered display settings. */
+/** Desktop-only key for the globe - what the marks, lines and ghosts mean - plus remembered display settings. */
 export const GlobeLegend = () => {
   const hydrated = useHydrated();
   const hdImagery = useAppStore((s) => s.hdImagery);
@@ -45,7 +45,7 @@ export const GlobeLegend = () => {
       {hydrated && (
         <div className="pointer-events-auto mt-1 grid grid-cols-2 gap-x-4 border-t border-panel-edge/70 pt-1">
           <Switch label="HD imagery" checked={hdImagery} onChange={setHdImagery}
-            hint="Stream sharp satellite tiles earlier and one level finer while zoomed — uses more data" />
+            hint="Stream sharp satellite tiles earlier and one level finer while zoomed - uses more data" />
           <Switch label="Auto-spin" checked={autoSpin} onChange={setAutoSpin}
             hint="Slowly rotate the globe while nothing is selected" />
         </div>

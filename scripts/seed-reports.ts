@@ -6,7 +6,7 @@ import { events, persons } from '../src/lib/db/schema';
  * Ingest documented historical jet-emission figures from published reports as
  * source-cited events (classifier 'report:*'). Defensible: every figure carries
  * the report URL; descriptions mirror the report's own attribution caveats.
- * Idempotent per (person, classifier) — re-running replaces that report's rows.
+ * Idempotent per (person, classifier) - re-running replaces that report's rows.
  * Dry-run by default; --apply writes.
  *
  * Dated to each report's period, so these populate person timelines and all-time
@@ -51,7 +51,7 @@ const run = async () => {
   let written = 0;
   for (const r of REPORTS) {
     const person = await db.query.persons.findFirst({ where: eq(persons.slug, r.slug) });
-    if (!person) { console.log(`SKIP ${r.slug} — not in roster`); continue; }
+    if (!person) { console.log(`SKIP ${r.slug} - not in roster`); continue; }
     const flightTxt = r.flights ? `${r.flights} flights, ` : '';
     const title = `${r.date.slice(0, 4)} private-jet emissions: ${flightTxt}${Math.round(r.tons).toLocaleString('en-US')} t CO2`;
     const description = `${r.caveat}${r.note ?? ''}`;
@@ -75,7 +75,7 @@ const run = async () => {
       written++;
     }
   }
-  console.log(`\n${apply ? `APPLIED — ${written} report events written.` : `DRY RUN — ${REPORTS.length} entries. Re-run with --apply to write.`}`);
+  console.log(`\n${apply ? `APPLIED - ${written} report events written.` : `DRY RUN - ${REPORTS.length} entries. Re-run with --apply to write.`}`);
 };
 
 run().then(() => process.exit(0)).catch((err) => { console.error('seed-reports failed:', err); process.exit(1); });

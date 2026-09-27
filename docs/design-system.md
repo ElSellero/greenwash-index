@@ -1,4 +1,4 @@
-# Greenwash Index — Design System (Source of Truth, Phases 6–8)
+# Greenwash Index - Design System (Source of Truth, Phases 6–8)
 
 Synthesized from the binding plan brief + `ui-ux-pro-max` recommendations
 (Data-Dense Dashboard pattern, Cyberpunk UI / OLED Dark Mode styles).
@@ -9,7 +9,7 @@ component structure, props and behavior in the plan stay binding.
 
 Dark only (`color-scheme: dark`). No light variant.
 
-## Color Tokens (CSS variables, semantic — never raw hex in components)
+## Color Tokens (CSS variables, semantic - never raw hex in components)
 
 Implemented in `src/app/globals.css` as Tailwind v4 `@theme` tokens:
 
@@ -19,9 +19,9 @@ Implemented in `src/app/globals.css` as Tailwind v4 `@theme` tokens:
 | `--color-panel` | `#0a1020` | cards, sidebar, sheets |
 | `--color-panel-edge` | `#1a2a45` | hairline borders, dividers |
 | `--color-grid` | `#0f1830` | gridlines, subtle fills |
-| `--color-pos` | `#22ff88` | neon green — advocacy, "talk" |
-| `--color-neg` | `#ff3b5c` | neon red — emissions, "exhaust" |
-| `--color-accent` | `#38bdf8` | cyan — links, focus, interactive highlights |
+| `--color-pos` | `#22ff88` | neon green - advocacy, "talk" |
+| `--color-neg` | `#ff3b5c` | neon red - emissions, "exhaust" |
+| `--color-accent` | `#38bdf8` | cyan - links, focus, interactive highlights |
 | `--color-dim` | `#7d8db1` | secondary text |
 | `--color-jet` | `#38bdf8` | jets on the globe, their flight paths and legend |
 | `--color-yacht` | `#e879f9` | yachts on the globe, their sea routes and legend (kept apart from `--color-pos`, which means advocacy) |
@@ -34,7 +34,7 @@ Positive/negative never used for text below 14px without a contrast check.
 ## Typography
 
 - **Body/UI:** Fira Sans (400/500/600) via `next/font`, var `--font-fira-sans`, fallback `system-ui, sans-serif`
-- **Numbers, code, tickers, coordinates, all data:** Fira Code via `next/font`, var `--font-fira-code` —
+- **Numbers, code, tickers, coordinates, all data:** Fira Code via `next/font`, var `--font-fira-code` -
   apply with the `.font-num` utility (`font-feature-settings: "tnum"`, tabular figures mandatory,
   no layout shift on ticking numbers)
 - Base 16px, line-height 1.5; scale 12 / 14 / 16 / 18 / 24 / 32 / 48
@@ -42,7 +42,7 @@ Positive/negative never used for text below 14px without a contrast check.
 
 ## Effects
 
-- **Glow:** `text-shadow: 0 0 10px <accent>` / `box-shadow: 0 0 12px -2px <accent>` —
+- **Glow:** `text-shadow: 0 0 10px <accent>` / `box-shadow: 0 0 12px -2px <accent>` -
   interactive and live elements only, sparingly (OLED guidance: minimal glow)
 - **Scanlines/glitch:** none (anti-pattern for data density and reduced-motion)
 - Transitions 150–300ms, `ease-out` enter / `ease-in` exit, transform/opacity only

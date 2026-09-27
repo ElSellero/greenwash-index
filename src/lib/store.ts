@@ -42,7 +42,7 @@ export const useAppStore = create<SelectionState>()(
       setAutoSpin: (on) => set({ autoSpin: on }),
     }),
     {
-      name: 'greenwash-index', // localStorage key — functional only, no consent needed
+      name: 'greenwash-index', // localStorage key - functional only, no consent needed
       partialize: (s) => ({ favorites: s.favorites, hdImagery: s.hdImagery, autoSpin: s.autoSpin }),
     },
   ),

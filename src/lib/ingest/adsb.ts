@@ -30,7 +30,7 @@ export const parseAdsbResponse = (json: unknown): AdsbState | null => {
   };
 };
 
-/** Sequential with a polite delay — adsb.lol is a free community API. */
+/** Sequential with a polite delay - adsb.lol is a free community API. */
 export const fetchJetStates = async (
   icaos: string[],
 ): Promise<Map<string, AdsbState | null>> => {

@@ -34,7 +34,7 @@ describe('stanceScore (rhetoric floor)', () => {
     expect(quiet).toBeGreaterThan(0);
     expect(loud).toBeCloseTo(quiet * 10, 5); // talk × deeds
   });
-  it('does not decay with age — a documented act counts the same whenever it happened', () => {
+  it('does not decay with age - a documented act counts the same whenever it happened', () => {
     expect(stanceScore([{ points: 1.5 }], 2)).toBe(stanceScore([{ points: 1.5 }], 2));
   });
 });

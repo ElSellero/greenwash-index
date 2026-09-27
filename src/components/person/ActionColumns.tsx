@@ -14,7 +14,7 @@ export const ActionColumns = ({ events }: { events: PersonDetail['events'] }) =>
         <ul className="space-y-3">
           {positive.map((e) => <ActionItem key={e.id} event={e} />)}
           {positive.length === 0 && (
-            <li className="text-sm text-dim">Radio silence. Not one documented green word. (At least they&apos;re consistent — multiplier stays at 1×.)</li>
+            <li className="text-sm text-dim">Radio silence. Not one documented green word. (At least they&apos;re consistent - multiplier stays at 1×.)</li>
           )}
         </ul>
       </section>
@@ -26,7 +26,7 @@ export const ActionColumns = ({ events }: { events: PersonDetail['events'] }) =>
         <ul className="space-y-3">
           {negative.map((e) => <ActionItem key={e.id} event={e} />)}
           {negative.length === 0 && (
-            <li className="text-sm text-dim">No documented emissions yet — either a saint or a very good transponder switch.</li>
+            <li className="text-sm text-dim">No documented emissions yet - either a saint or a very good transponder switch.</li>
           )}
         </ul>
       </section>

@@ -46,7 +46,7 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
       {snapshot && <div className="mt-6"><ScoreBreakdown snapshot={snapshot} /></div>}
       {vehicles.length > 0 && (
         <div className="mt-6 rounded-xl border border-panel-edge bg-panel p-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-dim">Fleet — tracked emissions (all-time)</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-dim">Fleet - tracked emissions (all-time)</p>
           <div className="mt-3"><VehicleEmissions vehicles={vehicles} jetCo2Kg={jetCo2} yachtCo2Kg={yachtCo2} /></div>
           <p className="mt-3 text-xs text-dim">
             Jet figures come from documented flights, yacht figures from documented voyages; ownership without a
