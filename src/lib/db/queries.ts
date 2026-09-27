@@ -2,6 +2,7 @@ import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { db } from './client';
 import { events, persons, positions, scoreSnapshots, trips, vehicles } from './schema';
 import { allTimeScore } from '@/lib/score/hypocrisy';
+import { plainHyphens } from '@/lib/format';
 
 /** Latest snapshot per person joined with person - the leaderboard. */
 export const getLeaderboard = async () => {
@@ -17,7 +18,7 @@ export const getLeaderboard = async () => {
     select sum(e.co2_kg * e.weight_factor) from ${events} e
     where e.person_id = ${scoreSnapshots.personId} and e.kind = 'negative' and e.type = ${type}
     ${last12m ? sql`and e.occurred_at >= now() - interval '365 days'` : sql``}), 0)`;
-  return db.with(latest)
+  const rows = await db.with(latest)
     .select({
       personId: persons.id,
       slug: persons.slug,
@@ -49,6 +50,7 @@ export const getLeaderboard = async () => {
     ))
     .innerJoin(persons, eq(persons.id, scoreSnapshots.personId))
     .orderBy(scoreSnapshots.rank);
+  return rows.map((r) => ({ ...r, vehicles: r.vehicles.map((v) => ({ ...v, name: plainHyphens(v.name) })) }));
 };
 
 export const getPersonDetail = async (slug: string) => {
@@ -68,7 +70,13 @@ export const getPersonDetail = async (slug: string) => {
   const allTimeRank = [...board]
     .sort((a, b) => allTimeScore(b) - allTimeScore(a))
     .findIndex((e) => e.personId === person.id) + 1 || null;
-  return { person, vehicles: personVehicles, events: personEvents, snapshot: snapshot[0] ?? null, allTimeRank };
+  return {
+    person: { ...person, bio: plainHyphens(person.bio) },
+    vehicles: personVehicles.map((v) => ({ ...v, name: plainHyphens(v.name) })),
+    events: personEvents.map((e) => ({ ...e, title: plainHyphens(e.title), description: plainHyphens(e.description) })),
+    snapshot: snapshot[0] ?? null,
+    allTimeRank,
+  };
 };
 
 /** Latest position per vehicle + active trip, for the globe. */
@@ -100,11 +108,11 @@ export const getCurrentPositions = async () => {
     ))
     .innerJoin(vehicles, eq(vehicles.id, positions.vehicleId));
   const activeTrips = await db.select().from(trips).where(eq(trips.status, 'active'));
-  return { positions: rows, activeTrips };
+  return { positions: rows.map((r) => ({ ...r, vehicleName: plainHyphens(r.vehicleName) })), activeTrips };
 };
 
-export const getRecentEvents = async (limit = 20) =>
-  db.select({
+export const getRecentEvents = async (limit = 20) => {
+  const rows = await db.select({
     id: events.id,
     personId: events.personId,
     name: persons.name,
@@ -120,6 +128,8 @@ export const getRecentEvents = async (limit = 20) =>
     .innerJoin(persons, eq(persons.id, events.personId))
     .orderBy(desc(events.createdAt))
     .limit(limit);
+  return rows.map((r) => ({ ...r, title: plainHyphens(r.title) }));
+};
 
 export const getTopNPersonIds = async (n: number): Promise<number[]> => {
   const board = await getLeaderboard();
