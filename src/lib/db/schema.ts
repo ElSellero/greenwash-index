@@ -34,7 +34,7 @@ export const events = pgTable('events', {
   type: text('type').notNull(), // positive: post|donation|investment|interview|speech|preaching ; negative: flight|yacht_trip|asset
   title: text('title').notNull(),
   description: text('description').notNull().default(''),
-  sourceUrl: text('source_url').notNull(), // HARD REQUIREMENT (legal) — primary source
+  sourceUrl: text('source_url').notNull(), // HARD REQUIREMENT (legal) - primary source
   extraSources: text('extra_sources').array(), // additional outlets corroborating the same act
   occurredAt: timestamp('occurred_at').notNull(),
   co2Kg: real('co2_kg'), // negative events only
@@ -91,6 +91,6 @@ export const scoreSnapshots = pgTable('score_snapshots', {
 
 export const seenArticles = pgTable('seen_articles', {
   id: serial('id').primaryKey(),
-  urlHash: text('url_hash').notNull().unique(), // sha256 of canonical URL — ingest dedupe
+  urlHash: text('url_hash').notNull().unique(), // sha256 of canonical URL - ingest dedupe
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });

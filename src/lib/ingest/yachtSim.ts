@@ -21,7 +21,7 @@ export const MARINAS: Marina[] = [
   { name: 'Cannes', lat: 43.549, lng: 7.017, airport: { lat: 43.542, lng: 6.953 }, airportName: 'Cannes-Mandelieu Airport' },
 ];
 
-/** mulberry32 — tiny seeded PRNG, good enough for satire. */
+/** mulberry32 - tiny seeded PRNG, good enough for satire. */
 const prng = (seed: number) => () => {
   seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
   let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
@@ -74,7 +74,7 @@ export const yachtPositionAt = (vehicleId: number, at: Date): SimPosition => {
   return { lat: p.lat, lng: p.lng, heading: p.heading, isMoving: v.isMoving, from: v.from, to: v.to };
 };
 
-/** Unverified jets never fly in the simulation — they sit at an airport near a marina. */
+/** Unverified jets never fly in the simulation - they sit at an airport near a marina. */
 const parkedJetAt = (vehicleId: number, at: Date): SimPosition => {
   const { from, to } = weeklyMarinas(vehicleId + PARKED_JET_SEED_OFFSET, at);
   return {

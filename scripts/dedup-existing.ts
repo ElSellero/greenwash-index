@@ -52,7 +52,7 @@ const run = async () => {
           urls.delete(anchor.sourceUrl);
           console.log(
             `  ${p.name} [${anchor.kind}/${anchor.type}] ${anchor.occurredAt.toISOString().slice(0, 10)} `
-            + `"${anchor.title.slice(0, 60)}" — keep #${anchor.id}, fold ${extras.length} (${extras.map((e) => e.id).join(',')})`,
+            + `"${anchor.title.slice(0, 60)}" - keep #${anchor.id}, fold ${extras.length} (${extras.map((e) => e.id).join(',')})`,
           );
           if (apply) {
             await db.update(events)
@@ -74,7 +74,7 @@ const run = async () => {
       await flush();
     }
   }
-  console.log(`\n${apply ? 'APPLIED' : 'DRY RUN'} — ${clusters} duplicate clusters, ${toDelete} rows folded into their anchor.`);
+  console.log(`\n${apply ? 'APPLIED' : 'DRY RUN'} - ${clusters} duplicate clusters, ${toDelete} rows folded into their anchor.`);
   if (!apply) console.log('Re-run with --apply to write.');
 };
 

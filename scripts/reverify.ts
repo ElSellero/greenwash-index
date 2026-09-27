@@ -14,7 +14,7 @@ import { interCallDelayMs } from '../src/lib/ingest/llm';
  *   classification + provenance, mark reviewed. The weak-model guess is upgraded.
  * - Gemini rejects it (irrelevant / low confidence) → neutralize it (mark
  *   classifier 'gemini-rejected', weight_factor 0) so it stops counting but is
- *   kept for audit — non-destructive, safe for unattended runs.
+ *   kept for audit - non-destructive, safe for unattended runs.
  * - Gemini unavailable (quota/network) → skip; the row stays 'ollama:*' for a
  *   later run.
  *
@@ -43,7 +43,7 @@ const run = async () => {
   let skipped = 0;
 
   for (const e of rows) {
-    const headline = e.description ? `${e.title} — ${e.description}` : e.title;
+    const headline = e.description ? `${e.title} - ${e.description}` : e.title;
     const c = await runClassification(
       `Person: ${e.personName}\nHeadline: ${headline}\nPublished: (from a prior report)`,
       true, // Gemini only
@@ -53,12 +53,12 @@ const run = async () => {
 
     if (!c) {
       skipped++;
-      console.log(`SKIP   #${e.id} (Gemini unavailable) — ${e.title.slice(0, 55)}`);
+      console.log(`SKIP   #${e.id} (Gemini unavailable) - ${e.title.slice(0, 55)}`);
       continue;
     }
     if (!passesGuardrails(c, e.sourceUrl)) {
       rejected++;
-      console.log(`REJECT #${e.id} (Gemini: ${c.relevant ? 'low confidence' : 'not relevant'}) — neutralized — ${e.title.slice(0, 50)}`);
+      console.log(`REJECT #${e.id} (Gemini: ${c.relevant ? 'low confidence' : 'not relevant'}) - neutralized - ${e.title.slice(0, 50)}`);
       // non-destructive: keep the row for audit but mark it rejected and drop its
       // score weight, instead of deleting (safe for unattended runs, no data loss)
       if (apply) {
@@ -69,7 +69,7 @@ const run = async () => {
     }
     upgraded++;
     const changed = c.kind !== e.kind || c.type !== e.type;
-    console.log(`UPGRADE #${e.id} ${e.classifier} → ${c.classifier}${changed ? ` [${e.kind}/${e.type} → ${c.kind}/${c.type}]` : ` [${c.kind}/${c.type}]`} — ${c.title.slice(0, 50)}`);
+    console.log(`UPGRADE #${e.id} ${e.classifier} → ${c.classifier}${changed ? ` [${e.kind}/${e.type} → ${c.kind}/${c.type}]` : ` [${c.kind}/${c.type}]`} - ${c.title.slice(0, 50)}`);
     if (apply) {
       await db.update(events).set({
         kind: c.kind,
@@ -84,7 +84,7 @@ const run = async () => {
     }
   }
 
-  console.log(`\n${apply ? 'APPLIED' : 'DRY RUN'} — upgraded ${upgraded}, rejected ${rejected}, skipped ${skipped} (of ${rows.length}).`);
+  console.log(`\n${apply ? 'APPLIED' : 'DRY RUN'} - upgraded ${upgraded}, rejected ${rejected}, skipped ${skipped} (of ${rows.length}).`);
   if (!apply && rows.length > 0) console.log('Re-run with --apply to write.');
 };
 

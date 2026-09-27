@@ -26,8 +26,8 @@ const run = async () => {
   let written = 0;
   for (const e of ENTRIES) {
     const person = await db.query.persons.findFirst({ where: eq(persons.slug, e.slug) });
-    if (!person) { console.log(`SKIP ${e.slug} — not in roster`); continue; }
-    console.log(`${apply ? 'WRITE' : 'DRY'} ${person.name} — ${e.yacht}: mmsi ${e.mmsi}`);
+    if (!person) { console.log(`SKIP ${e.slug} - not in roster`); continue; }
+    console.log(`${apply ? 'WRITE' : 'DRY'} ${person.name} - ${e.yacht}: mmsi ${e.mmsi}`);
     if (apply) {
       await db.update(vehicles).set({
         mmsi: e.mmsi,
@@ -37,7 +37,7 @@ const run = async () => {
       written++;
     }
   }
-  console.log(`\n${apply ? `APPLIED — ${written} yachts updated.` : `DRY RUN — ${ENTRIES.length} entries. Re-run with --apply.`}`);
+  console.log(`\n${apply ? `APPLIED - ${written} yachts updated.` : `DRY RUN - ${ENTRIES.length} entries. Re-run with --apply.`}`);
 };
 
 run().then(() => process.exit(0)).catch((err) => { console.error('seed-mmsi failed:', err); process.exit(1); });

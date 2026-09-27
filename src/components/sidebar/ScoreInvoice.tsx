@@ -14,7 +14,7 @@ const Line = ({ line }: { line: InvoiceLine }) => {
         <div className="flex items-center gap-1.5">
           <VehicleGlyph type={line.type} />
           <dt className="min-w-0 flex-1 truncate font-sans text-slate-300">{line.label}</dt>
-          <dd className="text-neg">{line.co2Kg > 0 ? formatCo2Kg(line.co2Kg) : '—'}</dd>
+          <dd className="text-neg">{line.co2Kg > 0 ? formatCo2Kg(line.co2Kg) : '-'}</dd>
         </div>
       );
     case 'other':
@@ -35,7 +35,7 @@ const Line = ({ line }: { line: InvoiceLine }) => {
       );
     case 'rhetoric':
       return (
-        <div className="flex items-center gap-1.5" title="Documented acts without a CO2 figure, amplified by the multiplier — see methodology">
+        <div className="flex items-center gap-1.5" title="Documented acts without a CO2 figure, amplified by the multiplier - see methodology">
           <Operator>+</Operator>
           <dt className="flex-1 font-sans text-dim">Rhetoric floor</dt>
           <dd className="text-accent">+{formatScore(line.points)}</dd>

@@ -11,14 +11,14 @@ import { createHash } from 'node:crypto';
 /** GDELT asks for <= 1 query / 5s; faster gets throttled to empty results. */
 const GDELT_WINDOW_DELAY_MS = 6_000;
 
-/** GDELT full-text archive reaches back years — query in yearly windows. */
+/** GDELT full-text archive reaches back years - query in yearly windows. */
 const fetchHistorical = async (slug: string, name: string): Promise<Article[]> => {
   const out: Article[] = [];
   const windows = ['2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025', '2025-2026'];
   for (const w of windows) {
     const [from, to] = w.split('-');
     const q = encodeURIComponent(`${personNameQuery(slug, name)} (climate OR "private jet" OR yacht OR donation)`);
-    // one retry — GDELT throttling shows up as a non-ok status or a thrown timeout
+    // one retry - GDELT throttling shows up as a non-ok status or a thrown timeout
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const res = await fetch(
@@ -44,7 +44,7 @@ const processArticle = async (p: { id: number; name: string }, article: Article)
     const delay = interCallDelayMs();
     if (delay) await new Promise((r) => setTimeout(r, delay));
   }
-  if (!c) return; // LLM error / rate limit — stays unseen, next run retries
+  if (!c) return; // LLM error / rate limit - stays unseen, next run retries
   await db.insert(seenArticles).values({ urlHash: hash }).onConflictDoNothing();
   if (!passesGuardrails(c, article.url)) return;
   const result = await storeClassifiedEvent(p.id, c, article.url);
@@ -60,7 +60,7 @@ const run = async () => {
     try {
       articles = await fetchHistorical(p.slug, p.name);
     } catch (err) {
-      console.log(`  fetch failed (${err instanceof Error ? err.message : 'unknown'}) — skipping person`);
+      console.log(`  fetch failed (${err instanceof Error ? err.message : 'unknown'}) - skipping person`);
       continue;
     }
     console.log(`  ${articles.length} candidate articles`);
@@ -69,7 +69,7 @@ const run = async () => {
       try {
         await processArticle(p, article);
       } catch (err) {
-        console.log(`  ! error on "${article.title.slice(0, 50)}" — ${err instanceof Error ? err.message : 'unknown'}, skipped`);
+        console.log(`  ! error on "${article.title.slice(0, 50)}" - ${err instanceof Error ? err.message : 'unknown'}, skipped`);
       }
     }
   }

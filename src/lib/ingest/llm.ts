@@ -142,7 +142,7 @@ export const runWithFallback = async <T>(
   throw lastErr ?? new Error('no classification attempts configured');
 };
 
-/** Pause between cloud LLM calls — keeps the Gemini free tier under its RPM limit. */
+/** Pause between cloud LLM calls - keeps the Gemini free tier under its RPM limit. */
 export const interCallDelayMs = (): number => (googleKey() ? 5_000 : 0);
 
 /** Per-run classification cap sized to the serverless time budget (maxDuration 300s). */
@@ -150,7 +150,7 @@ export const maxClassificationsPerRun = (): number => (googleKey() ? 25 : 80);
 
 /**
  * Neutralise an untrusted third-party string (a scraped headline/summary) before
- * it is interpolated into an LLM prompt — our defence against prompt injection
+ * it is interpolated into an LLM prompt - our defence against prompt injection
  * from source pages. Collapses every run of whitespace and control/format
  * characters (newlines, tabs, zero-width and bidi-override chars) to a single
  * space, so an attacker can't smuggle in a fake field on its own line

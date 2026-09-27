@@ -32,7 +32,7 @@ const run = async () => {
         }),
       ));
     } catch (err) {
-      console.log(`ERROR ${jet.personName} (${jet.name}) — ${err instanceof Error ? err.name : 'unknown'}, skipped`);
+      console.log(`ERROR ${jet.personName} (${jet.name}) - ${err instanceof Error ? err.name : 'unknown'}, skipped`);
       const delay = interCallDelayMs();
       if (delay) await new Promise((r) => setTimeout(r, delay));
       continue;
@@ -47,7 +47,7 @@ const run = async () => {
       }).where(eq(vehicles.id, jet.id));
       console.log(`CANDIDATE ${jet.personName}: ${object.registration} / ${icao24}\n  verify: ${object.verificationUrl}\n  check:  https://globe.adsb.lol/?icao=${icao24}`);
     } else {
-      console.log(`SKIPPED ${jet.personName} (${jet.name}) — no documented registration`);
+      console.log(`SKIPPED ${jet.personName} (${jet.name}) - no documented registration`);
     }
     const delay = interCallDelayMs();
     if (delay) await new Promise((r) => setTimeout(r, delay));

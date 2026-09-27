@@ -6,7 +6,7 @@ import { BarList } from '@/components/doc/BarList';
 import { DocCard, DocPage, DocSection } from '@/components/doc/DocPage';
 import { SourceBadge } from '@/components/ui/SourceBadge';
 
-export const metadata: Metadata = { title: 'Methodology — Greenwash Index' };
+export const metadata: Metadata = { title: 'Methodology - Greenwash Index' };
 
 const TOC = [
   { id: 'score', label: 'The score' },
@@ -43,12 +43,12 @@ const Formula = () => (
 
 const MethodologyPage = () => (
   <DocPage current="/methodology" eyebrow="Open formula · no black box" title="Methodology" toc={TOC}
-    lede="The Greenwash Index is a satirical, editorial data project. Every ranking is an opinion computed from publicly sourced facts via the open formula below — and the code is open source.">
+    lede="The Greenwash Index is a satirical, editorial data project. Every ranking is an opinion computed from publicly sourced facts via the open formula below - and the code is open source.">
     <DocSection id="score" index={1} title="The Hypocrisy Score">
       <Formula />
       <p>
         <b>co2Tons</b>{' '}is windowed: the <i>Last 12 months</i>{' '}score uses the rolling year, <i>All-time</i>{' '}uses
-        every documented tonne. The multiplier and rhetoric floor are lifetime — not decayed, since the window
+        every documented tonne. The multiplier and rhetoric floor are lifetime - not decayed, since the window
         already carries recency. Toggle both windows in the sidebar: the list writes each score out line by line,
         exactly like the formula above.
       </p>
@@ -67,13 +67,13 @@ const MethodologyPage = () => (
 
     <DocSection id="rhetoric" index={3} title="Rhetoric floor">
       <p>
-        Hypocrisy needs the gap — green talk <i>and</i>{' '}dirty deeds. Documented <i>ownership</i>{' '}we can&apos;t
+        Hypocrisy needs the gap - green talk <i>and</i>{' '}dirty deeds. Documented <i>ownership</i>{' '}we can&apos;t
         turn into a trip (a reported private jet, yacht or mansion) still counts via a small, capped floor term,
         amplified by the same advocacy multiplier, so loud-talk-plus-untracked-exhaust reads above zero.
       </p>
       <p>
         Crucially, <b>advocacy alone never scores</b>: someone who only champions the climate and has no documented
-        high-emission act stays at zero — they&apos;re consistent, not a hypocrite. The floor is deliberately tiny;
+        high-emission act stays at zero - they&apos;re consistent, not a hypocrite. The floor is deliberately tiny;
         real tracked tonnes (× multiplier) dwarf it.
       </p>
     </DocSection>
@@ -81,9 +81,9 @@ const MethodologyPage = () => (
     <DocSection id="estimates" index={4} title="Estimated travel">
       <p>
         When a flight or yacht trip is documented in the news but no distance is given, we assign a deliberately
-        conservative estimated tonnage from the person&apos;s known aircraft or vessel — a representative{' '}
+        conservative estimated tonnage from the person&apos;s known aircraft or vessel - a representative{' '}
         {CONFIG.co2.estimatedFlightKm} km flight / {CONFIG.co2.estimatedYachtTripKm} km voyage × the kg/km factors
-        below — clearly marked <SourceBadge kind="estimated" />, intentionally understating frequent flyers rather
+        below - clearly marked <SourceBadge kind="estimated" />, intentionally understating frequent flyers rather
         than overstating them.
       </p>
     </DocSection>
@@ -92,7 +92,7 @@ const MethodologyPage = () => (
       <p>
         One announcement is reported by dozens of outlets, in many languages. Articles describing the same act by
         the same person within {CONFIG.score.dedup.sameEventWindowDays} days are merged into a single entry with every
-        source linked — counted once, never inflated by coverage volume. A genuine later re-statement of the same act
+        source linked - counted once, never inflated by coverage volume. A genuine later re-statement of the same act
         (within {CONFIG.score.dedup.echoWindowDays} days) still counts, but is down-weighted to{' '}
         {CONFIG.score.dedup.echoWeightFactor}× so repetition alone can&apos;t move a ranking. The same rules apply to
         every person on the list.
@@ -117,7 +117,7 @@ const MethodologyPage = () => (
           <dt className="w-28 shrink-0 pt-0.5"><SourceBadge kind="adsb" /></dt>
           <dd>
             Public ADS-B transponder data (adsb.lol) for jets, public AIS data (AISStream) for yachts. A live
-            position that stops updating is greyed out on the globe as <i>signal lost</i>{' '}— after a few hours for
+            position that stops updating is greyed out on the globe as <i>signal lost</i>{' '}- after a few hours for
             a vehicle in motion, after a month for a parked one.
           </dd>
         </div>
@@ -138,14 +138,14 @@ const MethodologyPage = () => (
         </div>
         <div className="flex gap-3">
           <dt className="w-28 shrink-0 pt-0.5"><SourceBadge kind="estimated" /></dt>
-          <dd>Computed from published fuel-burn figures — an estimate, not a measurement.</dd>
+          <dd>Computed from published fuel-burn figures - an estimate, not a measurement.</dd>
         </div>
       </dl>
     </DocSection>
 
     <DocSection id="globe" index={8} title="On the globe">
       <p>
-        Day and night follow the real sun. Solid lines are the path a vehicle has covered on its current trip —
+        Day and night follow the real sun. Solid lines are the path a vehicle has covered on its current trip -
         great circles at cruising altitude for jets, sea lanes on the water for yachts; dotted lines are the rest of a
         simulated voyage. Vehicles parked at the same spot fan out around a marker of their true position. Zoom in and
         sharper satellite imagery (about 500 m per pixel) streams in for the area you are looking at.
@@ -157,7 +157,7 @@ const MethodologyPage = () => (
         Spotted an event whose source doesn&apos;t support it? Open an issue on{' '}
         {CONTACT.issuesUrl ? <External href={CONTACT.issuesUrl}>GitHub</External> : 'GitHub'}{' '}or write to the
         address in the{' '}
-        <a href="/imprint" className={ext}>imprint</a>{' '}— substantiated complaints lead to correction or removal.
+        <a href="/imprint" className={ext}>imprint</a>{' '}- substantiated complaints lead to correction or removal.
       </p>
     </DocSection>
 

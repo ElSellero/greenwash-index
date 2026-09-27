@@ -26,7 +26,7 @@ export const Co2Ticker = ({ baseKg, ratePerSec, snapshotAt, className }: Props) 
 
   return (
     <span className={`font-[family-name:var(--font-mono-num)] tabular-nums ${className ?? ''}`}
-      title="Estimated — interpolated from the last data refresh">
+      title="Estimated - interpolated from the last data refresh">
       {formatCo2Kg(display)}
     </span>
   );

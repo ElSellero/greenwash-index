@@ -6,7 +6,7 @@
  * One of those on a scheduled job's opening SELECT used to abort the entire run
  * (ais-sample, 2026-07-27) even though the runs either side connected fine.
  *
- * Only connection-level failures are retried — a real SQL error (bad column,
+ * Only connection-level failures are retried - a real SQL error (bad column,
  * constraint violation) still fails immediately. Deliberately scoped to reads:
  * `fetch failed` can also mean "response lost after the server ran the query",
  * so retrying a write could duplicate it.
@@ -49,7 +49,7 @@ export const withDbRetry = async <T>(
       if (attempt >= attempts || !isTransientDbError(err)) throw err;
       const wait = attempt * baseDelayMs;
       const reason = (err instanceof Error ? err.message : String(err)).split('\n')[0]?.slice(0, 120);
-      console.warn(`db ${label}: transient failure ${attempt}/${attempts}, retrying in ${wait}ms — ${reason}`);
+      console.warn(`db ${label}: transient failure ${attempt}/${attempts}, retrying in ${wait}ms - ${reason}`);
       await new Promise((r) => setTimeout(r, wait));
     }
   }

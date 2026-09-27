@@ -20,7 +20,7 @@ const TAP_PX = 6;
 const MIN_DISTANCE = 1.25;
 /**
  * Distance/zoom so the unit globe fits the viewport. Portrait phones are narrow,
- * so the horizontal field of view is the binding constraint — the camera has to
+ * so the horizontal field of view is the binding constraint - the camera has to
  * sit further back or the globe gets clipped left/right. Also raises the zoom-out
  * limit on those screens so the whole globe is reachable.
  */

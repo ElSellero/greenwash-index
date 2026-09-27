@@ -25,7 +25,7 @@ const trip = (over: Partial<Trip>): Trip => ({
 const resolve = (positions: Position[], activeTrips: Trip[] = []) =>
   resolveFleet({ positions, activeTrips }, NOW);
 
-describe('resolveFleet — live vehicles', () => {
+describe('resolveFleet - live vehicles', () => {
   it('draws a fresh flight from where its trip started to where the jet is now', () => {
     const [jet] = resolve([position({ isMoving: true })], [trip({})]);
     expect(jet!.status).toBe('moving');
@@ -76,7 +76,7 @@ describe('resolveFleet — live vehicles', () => {
   });
 });
 
-describe('resolveFleet — simulated vehicles', () => {
+describe('resolveFleet - simulated vehicles', () => {
   it('places a simulated yacht where the simulation has it now, not at its last stored fix', () => {
     const [yacht] = resolve([position({
       vehicleId: 10, type: 'yacht', trackingMode: 'simulated', source: 'sim', lat: 0, lng: 0,
@@ -130,7 +130,7 @@ describe('focusedVehicle', () => {
   });
 });
 
-describe('resolveFleet — location', () => {
+describe('resolveFleet - location', () => {
   it('names the airport a simulated jet is parked at, since the week began', () => {
     const [jet] = resolve([position({ vehicleId: 54, trackingMode: 'simulated', source: 'sim' })]);
     const stay = simulatedStay({ id: 54, type: 'jet' }, NOW);

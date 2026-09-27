@@ -1,6 +1,6 @@
 const FILL = { pos: 'bg-pos/80', neg: 'bg-neg/80' } as const;
 
-/** A single-series magnitude list: label, thin bar, value — readable as a plain table too. */
+/** A single-series magnitude list: label, thin bar, value - readable as a plain table too. */
 export const BarList = ({ rows, tone, caption, unit = '' }: {
   rows: { label: string; value: number }[];
   tone: keyof typeof FILL;

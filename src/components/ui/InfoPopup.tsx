@@ -31,7 +31,7 @@ export const InfoPopup = ({ entries, positions }: {
   const startY = useRef<number | null>(null);
   const entry = entries.find((e) => e.personId === selectedPersonId);
   // rank must match whatever window the leaderboard is showing: stored 12m rank,
-  // or the client-computed all-time rank — same ordering the sidebar list uses.
+  // or the client-computed all-time rank - same ordering the sidebar list uses.
   const rank = useMemo(() => {
     if (!entry) return 0;
     if (rankMode !== 'all') return entry.rank;

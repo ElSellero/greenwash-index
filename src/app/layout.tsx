@@ -13,7 +13,7 @@ const firaSans = Fira_Sans({
 const firaCode = Fira_Code({ subsets: ['latin'], variable: '--font-fira-code' });
 
 export const metadata: Metadata = {
-  title: 'Greenwash Index — who preaches water and flies kerosene',
+  title: 'Greenwash Index - who preaches water and flies kerosene',
   description:
     'Satirical data visualization ranking public figures by the gap between their climate advocacy and their documented private-jet and yacht emissions.',
 };

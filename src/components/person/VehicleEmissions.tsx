@@ -11,7 +11,7 @@ type Props = {
   yachtCo2Kg: number;
   /** Popup only: aim the globe at this vehicle type. Rows become clickable buttons. */
   onSelectType?: (type: VehicleType) => void;
-  /** Types that have a live position to fly to — only these rows are made clickable. */
+  /** Types that have a live position to fly to - only these rows are made clickable. */
   selectableTypes?: readonly VehicleType[];
   /** The type currently aimed at, highlighted as pressed. */
   activeType?: VehicleType | null;
@@ -19,7 +19,7 @@ type Props = {
 
 const names = (vs: Vehicle[]) => vs.map((v) => v.name).join(', ');
 
-/** Crosshair — signals "aim the globe here". Stays visible on touch (no hover). */
+/** Crosshair - signals "aim the globe here". Stays visible on touch (no hover). */
 const LocateIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
     strokeWidth="2" strokeLinecap="round" className={className} aria-hidden>
@@ -41,7 +41,7 @@ const RowLabel = ({ type, label, vs }: { type: VehicleType; label: string; vs: V
 
 const RowCo2 = ({ co2 }: { co2: number }) => (
   <span className="shrink-0 font-[family-name:var(--font-mono-num)] tabular-nums text-neg">
-    {co2 > 0 ? formatCo2Kg(co2) : '—'}
+    {co2 > 0 ? formatCo2Kg(co2) : '-'}
   </span>
 );
 

@@ -11,7 +11,7 @@ import { FOREIGN, translateToEnglish } from '../src/lib/ingest/translate';
  *
  * Non-destructive + safe to chain after every backfill: it ONLY rewrites the
  * title/description text and never touches kind/type/classifier/confidence/
- * weight — so it cannot change a score or a classification, only fix the display
+ * weight - so it cannot change a score or a classification, only fix the display
  * language. Gemini-only; if the quota is exhausted it SKIPs and the next run
  * retries. Default dry-run; pass --apply to write. Optional --limit=N.
  */
@@ -31,7 +31,7 @@ const run = async () => {
     const t = await translateToEnglish(e.title, e.description ?? '');
     const delay = interCallDelayMs();
     if (delay) await new Promise((r) => setTimeout(r, delay));
-    if (!t) { skipped++; console.log(`SKIP #${e.id} (Gemini unavailable) — ${e.title.slice(0, 45)}`); continue; }
+    if (!t) { skipped++; console.log(`SKIP #${e.id} (Gemini unavailable) - ${e.title.slice(0, 45)}`); continue; }
     translated++;
     console.log(`#${e.id}: ${e.title.slice(0, 35)} → ${t.title.slice(0, 50)}`);
     if (apply) {
@@ -40,7 +40,7 @@ const run = async () => {
         .where(eq(events.id, e.id));
     }
   }
-  console.log(`\n${apply ? 'APPLIED' : 'DRY RUN'} — translated ${translated}, skipped ${skipped} (of ${foreign.length}).`);
+  console.log(`\n${apply ? 'APPLIED' : 'DRY RUN'} - translated ${translated}, skipped ${skipped} (of ${foreign.length}).`);
   if (!apply && foreign.length > 0) console.log('Re-run with --apply to write.');
 };
 

@@ -6,7 +6,7 @@ import { events, persons } from '../src/lib/db/schema';
  * Delete auto-classified events that were attributed to the wrong person:
  * the assigned person's name does NOT appear in the title, but ANOTHER roster
  * person's full name does (e.g. a "Mark Zuckerberg $300M yacht" item filed under
- * Bill Gates). Conservative — only flags clear cross-person mismatches.
+ * Bill Gates). Conservative - only flags clear cross-person mismatches.
  * Dry-run by default; --apply deletes.
  */
 const apply = process.argv.includes('--apply');
@@ -39,9 +39,9 @@ const run = async () => {
   for (const f of flagged) console.log(`  #${f.id} ${f.person} ⇒ about ${f.other}: "${f.title}"`);
   if (apply) {
     for (const f of flagged) await db.delete(events).where(eq(events.id, f.id));
-    console.log(`\nAPPLIED — deleted ${flagged.length} misattributed events.`);
+    console.log(`\nAPPLIED - deleted ${flagged.length} misattributed events.`);
   } else {
-    console.log('\nDRY RUN — re-run with --apply to delete.');
+    console.log('\nDRY RUN - re-run with --apply to delete.');
   }
 };
 

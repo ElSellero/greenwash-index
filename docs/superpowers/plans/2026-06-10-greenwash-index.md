@@ -1,7 +1,7 @@
 # greenwash-index Implementation Plan
 
-> **For agentic workers:** Execute task-by-task: fresh subagent (or focused work block) per task, then verify spec compliance and code quality before moving on. If the superpowers plugin is available, use superpowers:subagent-driven-development. Subagents inherit the parent model — no model downgrades. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **For all frontend tasks (Phase 6–8):** REQUIRED SUB-SKILL: `ui-ux-pro-max:ui-ux-pro-max` must be invoked before writing UI code — it defines the design language (dark mission-control/cyberpunk) and component quality bar.
+> **For agentic workers:** Execute task-by-task: fresh subagent (or focused work block) per task, then verify spec compliance and code quality before moving on. If the superpowers plugin is available, use superpowers:subagent-driven-development. Subagents inherit the parent model - no model downgrades. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For all frontend tasks (Phase 6–8):** REQUIRED SUB-SKILL: `ui-ux-pro-max:ui-ux-pro-max` must be invoked before writing UI code - it defines the design language (dark mission-control/cyberpunk) and component quality bar.
 
 **Goal:** A satirical data-visualization web app showing celebrities' vehicle CO2 emissions vs. their public climate advocacy on an interactive 3D globe, ranked by a transparent "Hypocrisy Score", self-maintaining via automated ingest pipelines.
 
@@ -13,14 +13,14 @@
 
 ## Decision Record (from grill-me session 2026-06-10)
 
-1. **Data:** Hybrid — real ADS-B jet data (adsb.lol), simulated yacht routes, everything labeled `live` / `estimated` / `simulated`; graceful fallback to simulation.
+1. **Data:** Hybrid - real ADS-B jet data (adsb.lol), simulated yacht routes, everything labeled `live` / `estimated` / `simulated`; graceful fallback to simulation.
 2. **Legal:** Real names, public figures only. Every event row REQUIRES a `sourceUrl`. Score is presented as satirical opinion with a public methodology page.
 3. **Stack:** Next.js + React Three Fiber (see Tech Stack).
 4. **Storage:** Neon Postgres + Drizzle; API routes serve heavily cached JSON.
 5. **Live cadence:** Daily Vercel cron (full pipeline) + GitHub Actions every 15 min (top 20 only; interval is a config constant, ≥10 min out of politeness to free APIs). Client ticker interpolates.
 6. **Score:** `score = co2Tons12m × multiplier`, `multiplier = 1 + min(9, Σ weight × 0.5^(ageDays/730))`. Weights: post=1, interview=2, speech/keynote=3, public renunciation-preaching=5. Always shown as a breakdown in the UI.
 7. **Scope:** 50 persons. System built data-first-empty; one-time deep-research backfill script; then self-maintaining.
-8. **Auto-pipeline:** LLM classification with hard guardrails — resolvable sourceUrl required, confidence ≥ 0.75, visible `auto-classified` badge, optional review flag. Sources: Google News RSS, GDELT, YouTube Data API (later), Wikidata (later), Bluesky (later). X/Twitter only indirectly via news coverage.
+8. **Auto-pipeline:** LLM classification with hard guardrails - resolvable sourceUrl required, confidence ≥ 0.75, visible `auto-classified` badge, optional review flag. Sources: Google News RSS, GDELT, YouTube Data API (later), Wikidata (later), Bluesky (later). X/Twitter only indirectly via news coverage.
 9. **Globe look:** NASA Black-Marble night texture + atmosphere fresnel glow + neon route arcs.
 10. **Privacy/Money:** Google AdSense + Google's TCF-2.2-certified CMP (no homemade banner). Ad slots planned into layout, consent-gated. Imprint + privacy pages.
 11. **Repo:** Public GitHub repo (free Actions minutes, transparency as legal asset).
@@ -117,11 +117,11 @@ greenwash-index/
 
 ---
 
-## Security Addendum (cross-cutting — applies to EVERY task; public repo ⇒ hostile-readable)
+## Security Addendum (cross-cutting - applies to EVERY task; public repo ⇒ hostile-readable)
 
 1. **Secrets** live only in `.env.local` (gitignored), GitHub Actions Secrets, Vercel env. Never in code, docs, workflows or commit history. Before every commit, the staged diff must contain no tokens/connection strings.
 2. **Branch model:** `main` = stable (Vercel production), `develop` = integration. ALL task commits land on `develop`. Merge develop→main only at release checkpoints.
-3. **Ingest auth** uses timing-safe comparison (`src/lib/auth.ts`, Task 15) — never `===` on secrets.
+3. **Ingest auth** uses timing-safe comparison (`src/lib/auth.ts`, Task 15) - never `===` on secrets.
 4. **HTTP security headers** in `next.config.ts` (Task 16, Step 2b):
 
 ```ts
@@ -164,12 +164,12 @@ jobs:
       - run: npm test
 ```
 
-7. **Untrusted input:** every external payload (ADS-B, RSS, GDELT, LLM output) passes zod; news headlines are untrusted prompt input — classification output is schema-constrained and never rendered as HTML; external links always `rel="noopener noreferrer"`.
+7. **Untrusted input:** every external payload (ADS-B, RSS, GDELT, LLM output) passes zod; news headlines are untrusted prompt input - classification output is schema-constrained and never rendered as HTML; external links always `rel="noopener noreferrer"`.
 8. **Client exposure:** only `NEXT_PUBLIC_ADSENSE_CLIENT` and `NEXT_PUBLIC_BASE_URL` are public; `DATABASE_URL`, `INGEST_SECRET`, `AI_GATEWAY_API_KEY` are server-only.
 
 ---
 
-# Phase 0 — Repo & Scaffold
+# Phase 0 - Repo & Scaffold
 
 Produces: bootable Next.js dev server, git history started, test runner working.
 
@@ -180,9 +180,9 @@ The directory already contains `docs/` (this plan), so `create-next-app` must sc
 **Files:**
 - Create: entire Next.js scaffold at repo root (via temp-dir move)
 
-- [ ] **Step 1: Verify repo state** — git repo with `main` + `develop` already exists (controller created it with plan, README, LICENSE, dependabot). Confirm you are on `develop`: `git branch --show-current` → `develop`. Never commit to main.
+- [ ] **Step 1: Verify repo state** - git repo with `main` + `develop` already exists (controller created it with plan, README, LICENSE, dependabot). Confirm you are on `develop`: `git branch --show-current` → `develop`. Never commit to main.
 
-- [ ] **Step 2: Scaffold into temp dir, move to root** (PowerShell). README.md at root is hand-written — keep ours, discard the scaffold's. Use the scaffold's `.gitignore` (it's complete and covers `.env*` — verify that after moving).
+- [ ] **Step 2: Scaffold into temp dir, move to root** (PowerShell). README.md at root is hand-written - keep ours, discard the scaffold's. Use the scaffold's `.gitignore` (it's complete and covers `.env*` - verify that after moving).
 
 ```powershell
 npx create-next-app@latest tmp-scaffold --ts --tailwind --eslint --app --src-dir --turbopack --use-npm --yes
@@ -264,7 +264,7 @@ export const CONFIG = {
     tagline: 'Tracking the gap between climate talk and climate exhaust.',
   },
   live: {
-    /** GitHub Actions cadence (min). Keep >= 10 — free community APIs. */
+    /** GitHub Actions cadence (min). Keep >= 10 - free community APIs. */
     intervalMinutes: 15,
     /** Only this many top-ranked persons get live position refreshes. */
     topN: 20,
@@ -317,7 +317,7 @@ git commit -m "feat: central config with score weights and cadence constants"
 
 ---
 
-# Phase 1 — Pure Domain Core (TDD)
+# Phase 1 - Pure Domain Core (TDD)
 
 Produces: fully unit-tested geo/CO2/score functions with zero I/O. Everything later builds on these.
 
@@ -367,7 +367,7 @@ describe('arcPoints', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests, verify FAIL** — `npm test` → "Cannot find module '@/lib/geo'".
+- [ ] **Step 2: Run tests, verify FAIL** - `npm test` → "Cannot find module '@/lib/geo'".
 
 - [ ] **Step 3: Implement `src/lib/geo.ts`**
 
@@ -412,9 +412,9 @@ export const arcPoints = (a: Vector3, b: Vector3, segments = 64): Vector3[] => {
 };
 ```
 
-- [ ] **Step 4: Run tests, verify PASS** — `npm test`.
+- [ ] **Step 4: Run tests, verify PASS** - `npm test`.
 
-- [ ] **Step 5: Commit** — `git add src/lib/geo*; git commit -m "feat: geo utilities (haversine, sphere projection, arcs)"`
+- [ ] **Step 5: Commit** - `git add src/lib/geo*; git commit -m "feat: geo utilities (haversine, sphere projection, arcs)"`
 
 ### Task 5: CO2 math
 
@@ -484,7 +484,7 @@ export const co2RatePerSecond = (last24hKg: number): number => last24hKg / 86_40
 
 - [ ] **Step 4: Run tests, verify PASS.**
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: co2 math + jet model factors"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: co2 math + jet model factors"`
 
 ### Task 6: Hypocrisy score engine
 
@@ -554,7 +554,7 @@ export type AdvocacyEvent = { weight: number; occurredAt: Date };
 
 /**
  * multiplier = 1 + min(cap-1, Σ weight × 0.5^(ageDays / halfLife))
- * Documented verbatim on /methodology — keep code and page in sync.
+ * Documented verbatim on /methodology - keep code and page in sync.
  */
 export const advocacyMultiplier = (events: AdvocacyEvent[], now: Date): number => {
   const { halfLifeDays, multiplierCap } = CONFIG.score;
@@ -578,11 +578,11 @@ export const rankPersons = <T extends { score: number }>(
 
 - [ ] **Step 4: Run tests, verify PASS.**
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: hypocrisy score engine (weighted, decaying, capped)"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: hypocrisy score engine (weighted, decaying, capped)"`
 
 ---
 
-# Phase 2 — Database & Roster
+# Phase 2 - Database & Roster
 
 Produces: migrated Neon schema, 50-person roster seeded, vehicle data research-verified.
 
@@ -682,7 +682,7 @@ export const scoreSnapshots = pgTable('score_snapshots', {
 
 export const seenArticles = pgTable('seen_articles', {
   id: serial('id').primaryKey(),
-  urlHash: text('url_hash').notNull().unique(), // sha256 of canonical URL — ingest dedupe
+  urlHash: text('url_hash').notNull().unique(), // sha256 of canonical URL - ingest dedupe
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 ```
@@ -700,11 +700,11 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 3: Provision Neon.** Create a free Neon project (via Vercel Marketplace integration or neon.tech), put the pooled connection string into `.env.local` as `DATABASE_URL=postgres://…`. Verify `.env.local` is gitignored (create-next-app default `.env*` — confirm).
+- [ ] **Step 3: Provision Neon.** Create a free Neon project (via Vercel Marketplace integration or neon.tech), put the pooled connection string into `.env.local` as `DATABASE_URL=postgres://…`. Verify `.env.local` is gitignored (create-next-app default `.env*` - confirm).
 
-- [ ] **Step 4: Push schema** — `npx drizzle-kit push` (drizzle-kit reads `.env.local` only with dotenv; if it doesn't pick it up, run `npx dotenv -e .env.local -- drizzle-kit push` or set the var inline: `$env:DATABASE_URL='…'; npx drizzle-kit push`). Expected: tables created.
+- [ ] **Step 4: Push schema** - `npx drizzle-kit push` (drizzle-kit reads `.env.local` only with dotenv; if it doesn't pick it up, run `npx dotenv -e .env.local -- drizzle-kit push` or set the var inline: `$env:DATABASE_URL='…'; npx drizzle-kit push`). Expected: tables created.
 
-- [ ] **Step 5: Commit** — `git add src/lib/db/schema.ts drizzle.config.ts; git commit -m "feat: drizzle schema (persons, vehicles, events, positions, trips, snapshots)"`
+- [ ] **Step 5: Commit** - `git add src/lib/db/schema.ts drizzle.config.ts; git commit -m "feat: drizzle schema (persons, vehicles, events, positions, trips, snapshots)"`
 
 ### Task 8: DB client + query module
 
@@ -721,14 +721,14 @@ import * as schema from './schema';
 export const db = drizzle(neon(process.env.DATABASE_URL!), { schema });
 ```
 
-- [ ] **Step 2: Write `src/lib/db/queries.ts`** — every read the API routes need, in one place:
+- [ ] **Step 2: Write `src/lib/db/queries.ts`** - every read the API routes need, in one place:
 
 ```ts
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { db } from './client';
 import { events, persons, positions, scoreSnapshots, trips, vehicles } from './schema';
 
-/** Latest snapshot per person joined with person — the leaderboard. */
+/** Latest snapshot per person joined with person - the leaderboard. */
 export const getLeaderboard = async () => {
   const latest = db.$with('latest').as(
     db.select({
@@ -841,18 +841,18 @@ export const getEventsSince = async (personId: number, since: Date) =>
   ));
 ```
 
-- [ ] **Step 3: Typecheck** — `npx tsc --noEmit` → Expected: clean.
+- [ ] **Step 3: Typecheck** - `npx tsc --noEmit` → Expected: clean.
 
-- [ ] **Step 4: Commit** — `git commit -am "feat: db client and query module"`
+- [ ] **Step 4: Commit** - `git commit -am "feat: db client and query module"`
 
 ### Task 9: 50-person roster + seed script
 
-The roster ships names, categories and *claimed* vehicles; tail numbers/icao24 stay `null` until the research script (Task 10) verifies them with a source. Until verified, jets get `trackingMode: 'simulated'` — the site is never blocked on research.
+The roster ships names, categories and *claimed* vehicles; tail numbers/icao24 stay `null` until the research script (Task 10) verifies them with a source. Until verified, jets get `trackingMode: 'simulated'` - the site is never blocked on research.
 
 **Files:**
 - Create: `data/persons.json`, `scripts/seed.ts`
 
-- [ ] **Step 1: Write `data/persons.json`** — full roster. Structure per entry (the executor writes all 50; the categories below define the spread — ~20 tech/business, ~15 music/film, ~5 sports, ~10 known climate-vocal figures so the Snitch Factor has material):
+- [ ] **Step 1: Write `data/persons.json`** - full roster. Structure per entry (the executor writes all 50; the categories below define the spread - ~20 tech/business, ~15 music/film, ~5 sports, ~10 known climate-vocal figures so the Snitch Factor has material):
 
 ```json
 [
@@ -873,7 +873,7 @@ The roster ships names, categories and *claimed* vehicles; tail numbers/icao24 s
 ]
 ```
 
-Continue to 50 with: Mark Zuckerberg, Larry Ellison, Larry Page, Sergey Brin, Eric Schmidt, Michael Bloomberg, Bernard Arnault, Mukesh Ambani, David Geffen, Richard Branson, Mark Cuban, Oprah Winfrey, Steven Spielberg, Jay-Z, Beyoncé, Kylie Jenner, Travis Scott, Kanye West, Rihanna, Justin Bieber, Celine Dion, Tom Cruise, John Travolta, Harrison Ford, Floyd Mayweather, Cristiano Ronaldo, Lionel Messi, Lewis Hamilton, Roman Abramovich, Alisher Usmanov, the Walton family, Phil Knight, Ralph Lauren, Giorgio Armani, Jim Walton, Charles Koch, Al Gore (vehicles: []), John Kerry (vehicles: []), Prince Albert II, Sultan of Brunei, Tiger Woods, Steve Wynn, Wayne Newton. Yacht-only entries get `"modelKey": null`. Climate-vocal figures without owned vehicles keep `"vehicles": []` — their flights surface later via news events; their advocacy still feeds the multiplier.
+Continue to 50 with: Mark Zuckerberg, Larry Ellison, Larry Page, Sergey Brin, Eric Schmidt, Michael Bloomberg, Bernard Arnault, Mukesh Ambani, David Geffen, Richard Branson, Mark Cuban, Oprah Winfrey, Steven Spielberg, Jay-Z, Beyoncé, Kylie Jenner, Travis Scott, Kanye West, Rihanna, Justin Bieber, Celine Dion, Tom Cruise, John Travolta, Harrison Ford, Floyd Mayweather, Cristiano Ronaldo, Lionel Messi, Lewis Hamilton, Roman Abramovich, Alisher Usmanov, the Walton family, Phil Knight, Ralph Lauren, Giorgio Armani, Jim Walton, Charles Koch, Al Gore (vehicles: []), John Kerry (vehicles: []), Prince Albert II, Sultan of Brunei, Tiger Woods, Steve Wynn, Wayne Newton. Yacht-only entries get `"modelKey": null`. Climate-vocal figures without owned vehicles keep `"vehicles": []` - their flights surface later via news events; their advocacy still feeds the multiplier.
 
 - [ ] **Step 2: Write `scripts/seed.ts`**
 
@@ -917,11 +917,11 @@ const run = async () => {
 run().then(() => process.exit(0));
 ```
 
-Note: re-running the seed inserts duplicate vehicles — acceptable for a one-shot script; if re-seeding is ever needed, truncate `vehicles` first.
+Note: re-running the seed inserts duplicate vehicles - acceptable for a one-shot script; if re-seeding is ever needed, truncate `vehicles` first.
 
-- [ ] **Step 3: Run** — `npx dotenv -e .env.local -- tsx scripts/seed.ts` (or set `DATABASE_URL` inline). Expected: 50 "seeded …" lines.
+- [ ] **Step 3: Run** - `npx dotenv -e .env.local -- tsx scripts/seed.ts` (or set `DATABASE_URL` inline). Expected: 50 "seeded …" lines.
 
-- [ ] **Step 4: Commit** — `git add data scripts/seed.ts; git commit -m "feat: 50-person roster + seed script"`
+- [ ] **Step 4: Commit** - `git add data scripts/seed.ts; git commit -m "feat: 50-person roster + seed script"`
 
 ### Task 10: Vehicle research script (LLM-assisted, verification-gated)
 
@@ -969,7 +969,7 @@ const run = async () => {
       }).where(eq(vehicles.id, jet.id));
       console.log(`CANDIDATE ${jet.personName}: ${object.registration} / ${object.icao24}\n  verify: ${object.verificationUrl}\n  check:  https://globe.adsb.lol/?icao=${object.icao24}`);
     } else {
-      console.log(`SKIPPED ${jet.personName} (${jet.name}) — no documented registration`);
+      console.log(`SKIPPED ${jet.personName} (${jet.name}) - no documented registration`);
     }
   }
   console.log('\nNow spot-check each CANDIDATE line, then run with --confirm <icao24...> to mark verified+live.');
@@ -988,15 +988,15 @@ const args = process.argv.slice(2);
 (args[0] === '--confirm' ? confirm(args.slice(1)) : run()).then(() => process.exit(0));
 ```
 
-- [ ] **Step 2: Run candidate pass** — `npx dotenv -e .env.local -- tsx scripts/research-vehicles.ts`. Spot-check each printed `check:` URL (does the hex resolve to the right aircraft type?).
+- [ ] **Step 2: Run candidate pass** - `npx dotenv -e .env.local -- tsx scripts/research-vehicles.ts`. Spot-check each printed `check:` URL (does the hex resolve to the right aircraft type?).
 
-- [ ] **Step 3: Confirm verified hexes** — `npx dotenv -e .env.local -- tsx scripts/research-vehicles.ts --confirm a835af …` for each spot-checked hex.
+- [ ] **Step 3: Confirm verified hexes** - `npx dotenv -e .env.local -- tsx scripts/research-vehicles.ts --confirm a835af …` for each spot-checked hex.
 
-- [ ] **Step 4: Commit** — `git add scripts/research-vehicles.ts; git commit -m "feat: LLM-assisted vehicle research with manual verification gate"`
+- [ ] **Step 4: Commit** - `git add scripts/research-vehicles.ts; git commit -m "feat: LLM-assisted vehicle research with manual verification gate"`
 
 ---
 
-# Phase 3 — Vehicle Ingest (positions, trips, CO2 events)
+# Phase 3 - Vehicle Ingest (positions, trips, CO2 events)
 
 Produces: working `/api/ingest/daily` + `/api/ingest/live`, cron wiring, real ADS-B data flowing for verified jets, simulated yachts moving deterministically.
 
@@ -1006,7 +1006,7 @@ Produces: working `/api/ingest/daily` + `/api/ingest/live`, cron wiring, real AD
 - Create: `src/lib/ingest/adsb.ts`
 - Test: `src/lib/ingest/adsb.test.ts`
 
-- [ ] **Step 1: Write failing tests (parser only — fetch stays untested I/O)**
+- [ ] **Step 1: Write failing tests (parser only - fetch stays untested I/O)**
 
 ```ts
 // src/lib/ingest/adsb.test.ts
@@ -1068,7 +1068,7 @@ export const parseAdsbResponse = (json: unknown): AdsbState | null => {
   };
 };
 
-/** Sequential with a polite delay — adsb.lol is a free community API. */
+/** Sequential with a polite delay - adsb.lol is a free community API. */
 export const fetchJetStates = async (
   icaos: string[],
 ): Promise<Map<string, AdsbState | null>> => {
@@ -1091,7 +1091,7 @@ export const fetchJetStates = async (
 
 - [ ] **Step 4: Run tests, verify PASS.**
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: adsb.lol client with zod-validated parser"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: adsb.lol client with zod-validated parser"`
 
 ### Task 12: Trip state machine (pure core)
 
@@ -1182,7 +1182,7 @@ export const nextTripState = (
 
 - [ ] **Step 4: Run tests, verify PASS.**
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: trip state machine (open/extend/close with jitter filter)"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: trip state machine (open/extend/close with jitter filter)"`
 
 ### Task 13: Deterministic yacht simulation
 
@@ -1249,7 +1249,7 @@ export const MARINAS: { name: string; lat: number; lng: number }[] = [
   { name: 'Cannes', lat: 43.549, lng: 7.017 },
 ];
 
-/** mulberry32 — tiny seeded PRNG, good enough for satire. */
+/** mulberry32 - tiny seeded PRNG, good enough for satire. */
 const prng = (seed: number) => () => {
   seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
   let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
@@ -1287,14 +1287,14 @@ export const yachtPositionAt = (vehicleId: number, at: Date): SimPosition => {
 
 - [ ] **Step 4: Run tests, verify PASS.**
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: deterministic seeded yacht voyage simulation"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: deterministic seeded yacht voyage simulation"`
 
 ### Task 14: Pipeline orchestrators
 
 **Files:**
 - Create: `src/lib/ingest/pipeline.ts`
 
-- [ ] **Step 1: Write `src/lib/ingest/pipeline.ts`** (I/O orchestration over the tested pure cores; no unit tests — verified end-to-end in Task 15)
+- [ ] **Step 1: Write `src/lib/ingest/pipeline.ts`** (I/O orchestration over the tested pure cores; no unit tests - verified end-to-end in Task 15)
 
 ```ts
 import { and, eq, gte, sql } from 'drizzle-orm';
@@ -1354,7 +1354,7 @@ const recordObservation = async (
         personId: vehicle.personId,
         kind: 'negative',
         type: isJet ? 'flight' : 'yacht_trip',
-        title: `${isJet ? 'Flight' : 'Yacht trip'} — ${Math.round(transition.totalKm)} km (${vehicle.name})`,
+        title: `${isJet ? 'Flight' : 'Yacht trip'} - ${Math.round(transition.totalKm)} km (${vehicle.name})`,
         description: source === 'sim'
           ? 'Simulated voyage (estimated, see methodology).'
           : 'Tracked via public ADS-B data.',
@@ -1443,21 +1443,21 @@ export const runDailyPipeline = async (now = new Date()) => {
 };
 ```
 
-- [ ] **Step 2: Typecheck** — `npx tsc --noEmit` → clean.
+- [ ] **Step 2: Typecheck** - `npx tsc --noEmit` → clean.
 
-- [ ] **Step 3: Commit** — `git commit -am "feat: daily + live ingest orchestrators"`
+- [ ] **Step 3: Commit** - `git commit -am "feat: daily + live ingest orchestrators"`
 
 ### Task 15: Ingest API routes (secured)
 
 **Files:**
 - Create: `src/app/api/ingest/daily/route.ts`, `src/app/api/ingest/live/route.ts`
 
-- [ ] **Step 0: Write `src/lib/auth.ts`** — timing-safe comparison (security addendum #3):
+- [ ] **Step 0: Write `src/lib/auth.ts`** - timing-safe comparison (security addendum #3):
 
 ```ts
 import { timingSafeEqual } from 'node:crypto';
 
-/** Constant-time check of "Bearer <INGEST_SECRET>" — never compare secrets with ===. */
+/** Constant-time check of "Bearer <INGEST_SECRET>" - never compare secrets with ===. */
 export const isAuthorized = (authHeader: string | null): boolean => {
   const secret = process.env.INGEST_SECRET;
   if (!secret || !authHeader) return false;
@@ -1471,13 +1471,13 @@ export const isAuthorized = (authHeader: string | null): boolean => {
 
 ```ts
 import { runDailyPipeline } from '@/lib/ingest/pipeline';
-import { runNewsScan } from '@/lib/ingest/classify'; // added in Task 18 — stub `export const runNewsScan = async () => ({ scanned: 0 });` in classify.ts NOW so this compiles
+import { runNewsScan } from '@/lib/ingest/classify'; // added in Task 18 - stub `export const runNewsScan = async () => ({ scanned: 0 });` in classify.ts NOW so this compiles
 import { isAuthorized } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const maxDuration = 300;
 
-// Vercel cron sends Authorization: Bearer <CRON_SECRET> — set CRON_SECRET = INGEST_SECRET
+// Vercel cron sends Authorization: Bearer <CRON_SECRET> - set CRON_SECRET = INGEST_SECRET
 export const GET = async (req: NextRequest) => {
   if (!isAuthorized(req.headers.get('authorization')))
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
@@ -1511,7 +1511,7 @@ export const runNewsScan = async (): Promise<{ scanned: number }> => ({ scanned:
 
 - [ ] **Step 4: Set `INGEST_SECRET` in `.env.local`** (generate: `node -e "console.log(crypto.randomBytes(32).toString('hex'))"`).
 
-- [ ] **Step 5: End-to-end check** — `npm run dev`, then:
+- [ ] **Step 5: End-to-end check** - `npm run dev`, then:
 
 ```powershell
 curl -X POST http://localhost:3000/api/ingest/live -H "Authorization: Bearer <secret>"
@@ -1520,7 +1520,7 @@ curl http://localhost:3000/api/ingest/daily -H "Authorization: Bearer <secret>"
 
 Expected: `{"ok":true,...}` and rows in `positions` / `score_snapshots`. Without the header: 401.
 
-- [ ] **Step 6: Commit** — `git commit -am "feat: secured ingest routes (daily cron + live tick)"`
+- [ ] **Step 6: Commit** - `git commit -am "feat: secured ingest routes (daily cron + live tick)"`
 
 ### Task 16: Cron wiring (vercel.ts + GitHub Actions)
 
@@ -1542,7 +1542,7 @@ export const config: VercelConfig = {
 };
 ```
 
-Note: Vercel sends `Authorization: Bearer $CRON_SECRET` to cron endpoints — set the Vercel env var `CRON_SECRET` **and** `INGEST_SECRET` to the same value so the daily route's check passes.
+Note: Vercel sends `Authorization: Bearer $CRON_SECRET` to cron endpoints - set the Vercel env var `CRON_SECRET` **and** `INGEST_SECRET` to the same value so the daily route's check passes.
 
 - [ ] **Step 2: Write `.github/workflows/live-ingest.yml`**
 
@@ -1565,13 +1565,13 @@ jobs:
             --max-time 110
 ```
 
-- [ ] **Step 3: Commit** — `git add vercel.ts .github; git commit -m "feat: daily vercel cron + 15-min github actions live tick"`
+- [ ] **Step 3: Commit** - `git add vercel.ts .github; git commit -m "feat: daily vercel cron + 15-min github actions live tick"`
 
 (GH secrets `APP_URL` + `INGEST_SECRET` are set in Task 32 when the repo goes public.)
 
 ---
 
-# Phase 4 — Self-Maintaining Advocacy Pipeline
+# Phase 4 - Self-Maintaining Advocacy Pipeline
 
 Produces: news scanning + LLM classification with guardrails, one-time historical backfill.
 
@@ -1689,7 +1689,7 @@ export const fetchArticlesFor = async (personName: string): Promise<Article[]> =
 
 - [ ] **Step 4: Run tests, verify PASS.**
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: google news rss + gdelt fetchers with pure parsers"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: google news rss + gdelt fetchers with pure parsers"`
 
 ### Task 18: LLM classification with guardrails
 
@@ -1767,7 +1767,7 @@ const urlHash = (url: string): string => createHash('sha256').update(url).digest
 
 const SYSTEM = `You classify news articles about a public figure for a satirical but factually rigorous climate-accountability index.
 Classify ONLY what the article headline explicitly supports. Rules:
-- "positive" = verifiable pro-climate act: donation, green investment, interview, speech, social post — type "preaching" ONLY if they publicly urge OTHERS to fly less / eat less meat / live greener.
+- "positive" = verifiable pro-climate act: donation, green investment, interview, speech, social post - type "preaching" ONLY if they publicly urge OTHERS to fly less / eat less meat / live greener.
 - "negative" = documented high-emission act (charter flight reported, new yacht, mansion purchase).
 - relevant=false for gossip, unrelated business news, or speculation.
 - NEVER infer beyond the headline. Low information ⇒ low confidence.`;
@@ -1831,14 +1831,14 @@ export const runNewsScan = async (): Promise<{ scanned: number; stored: number }
 
 - [ ] **Step 5: Set `AI_GATEWAY_API_KEY` in `.env.local`** (Vercel dashboard → AI Gateway → API key).
 
-- [ ] **Step 6: Commit** — `git commit -am "feat: llm news classification with guardrails and url dedupe"`
+- [ ] **Step 6: Commit** - `git commit -am "feat: llm news classification with guardrails and url dedupe"`
 
 ### Task 19: One-time historical backfill
 
 **Files:**
 - Create: `scripts/backfill.ts`
 
-- [ ] **Step 1: Write `scripts/backfill.ts`** — same pipeline, wider time horizon, stronger model:
+- [ ] **Step 1: Write `scripts/backfill.ts`** - same pipeline, wider time horizon, stronger model:
 
 ```ts
 import { db } from '../src/lib/db/client';
@@ -1847,7 +1847,7 @@ import { parseGdelt, dedupeArticles, type Article } from '../src/lib/ingest/news
 import { classifyArticle, passesGuardrails, advocacyWeightFor } from '../src/lib/ingest/classify';
 import { createHash } from 'node:crypto';
 
-/** GDELT full-text archive reaches back years — query in 6-month windows. */
+/** GDELT full-text archive reaches back years - query in 6-month windows. */
 const fetchHistorical = async (name: string): Promise<Article[]> => {
   const out: Article[] = [];
   const windows = ['2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025', '2025-2026'];
@@ -1898,11 +1898,11 @@ run().then(() => process.exit(0));
 
 - [ ] **Step 3: Run the daily pipeline once** so snapshots exist: `curl http://localhost:3000/api/ingest/daily -H "Authorization: Bearer <secret>"`.
 
-- [ ] **Step 4: Commit** — `git add scripts/backfill.ts; git commit -m "feat: one-time historical event backfill via gdelt archive"`
+- [ ] **Step 4: Commit** - `git add scripts/backfill.ts; git commit -m "feat: one-time historical event backfill via gdelt archive"`
 
 ---
 
-# Phase 5 — Public API Routes (cached)
+# Phase 5 - Public API Routes (cached)
 
 Produces: the three read endpoints the frontend consumes, with CDN caching.
 
@@ -1962,16 +1962,16 @@ export const GET = async () => {
 };
 ```
 
-- [ ] **Step 4: Verify** — `npm run dev`; `curl http://localhost:3000/api/leaderboard` returns ranked persons; `curl http://localhost:3000/api/positions` returns latest positions; `curl http://localhost:3000/api/persons/elon-musk` returns events. Check `Cache-Control` headers present.
+- [ ] **Step 4: Verify** - `npm run dev`; `curl http://localhost:3000/api/leaderboard` returns ranked persons; `curl http://localhost:3000/api/positions` returns latest positions; `curl http://localhost:3000/api/persons/elon-musk` returns events. Check `Cache-Control` headers present.
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: cached public api (leaderboard, person detail, positions)"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: cached public api (leaderboard, person detail, positions)"`
 
 ### Task 21: Shared API types for the frontend
 
 **Files:**
 - Create: `src/lib/api-types.ts`
 
-- [ ] **Step 1: Write `src/lib/api-types.ts`** — derive types from queries so client components don't import server code:
+- [ ] **Step 1: Write `src/lib/api-types.ts`** - derive types from queries so client components don't import server code:
 
 ```ts
 import type { getLeaderboard, getPersonDetail, getCurrentPositions, getRecentEvents } from '@/lib/db/queries';
@@ -1988,13 +1988,13 @@ export type LeaderboardPayload = {
 };
 ```
 
-- [ ] **Step 2: Typecheck + commit** — `npx tsc --noEmit; git commit -am "feat: shared api types"`
+- [ ] **Step 2: Typecheck + commit** - `npx tsc --noEmit; git commit -am "feat: shared api types"`
 
 ---
 
-# Phase 6 — Frontend Foundation
+# Phase 6 - Frontend Foundation
 
-> **REQUIRED SUB-SKILL before any UI code in Phases 6–8:** invoke `ui-ux-pro-max:ui-ux-pro-max` with the design brief: *"dark mission-control / cyberpunk data-viz dashboard, near-black blue-tinted background, neon green (#22ff88) for positive / neon red (#ff3b5c) for negative accents, mono font for all numbers, glow effects on interactive elements, English UI"*. Where its output conflicts with exact class names below, the skill's design system wins — the component structure, props and behavior in this plan stay binding.
+> **REQUIRED SUB-SKILL before any UI code in Phases 6–8:** invoke `ui-ux-pro-max:ui-ux-pro-max` with the design brief: *"dark mission-control / cyberpunk data-viz dashboard, near-black blue-tinted background, neon green (#22ff88) for positive / neon red (#ff3b5c) for negative accents, mono font for all numbers, glow effects on interactive elements, English UI"*. Where its output conflicts with exact class names below, the skill's design system wins - the component structure, props and behavior in this plan stay binding.
 
 Produces: app shell, theme tokens, Zustand store with persisted favorites, sidebar with search + leaderboard, CO2 ticker.
 
@@ -2092,7 +2092,7 @@ export const useAppStore = create<SelectionState>()(
       setSearch: (q) => set({ search: q }),
     }),
     {
-      name: 'greenwash-index', // localStorage key — functional only, no consent needed
+      name: 'greenwash-index', // localStorage key - functional only, no consent needed
       partialize: (s) => ({ favorites: s.favorites }),
     },
   ),
@@ -2110,7 +2110,7 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
 
 export const metadata: Metadata = {
-  title: 'Greenwash Index — who preaches water and flies kerosene',
+  title: 'Greenwash Index - who preaches water and flies kerosene',
   description:
     'Satirical data visualization ranking public figures by the gap between their climate advocacy and their documented private-jet and yacht emissions.',
 };
@@ -2124,7 +2124,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
 export default RootLayout;
 ```
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: theme tokens, app shell, persisted store, formatters"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: theme tokens, app shell, persisted store, formatters"`
 
 ### Task 23: CO2 ticker + badges + texture asset
 
@@ -2137,9 +2137,9 @@ export default RootLayout;
 curl -L -o public/textures/earth-night.jpg "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_lights_2048.png"
 ```
 
-(If the three.js example texture moved, NASA Black Marble 2016 grayscale from `https://visibleearth.nasa.gov/images/144898` works — any 2k equirectangular night-lights image, public domain. Keep < 1 MB, convert to .jpg q80.)
+(If the three.js example texture moved, NASA Black Marble 2016 grayscale from `https://visibleearth.nasa.gov/images/144898` works - any 2k equirectangular night-lights image, public domain. Keep < 1 MB, convert to .jpg q80.)
 
-- [ ] **Step 2: Write `src/components/ui/Co2Ticker.tsx`** — interpolates from snapshot base + rate (decision 5):
+- [ ] **Step 2: Write `src/components/ui/Co2Ticker.tsx`** - interpolates from snapshot base + rate (decision 5):
 
 ```tsx
 'use client';
@@ -2170,21 +2170,21 @@ export const Co2Ticker = ({ baseKg, ratePerSec, snapshotAt, className }: Props) 
 
   return (
     <span className={`font-[family-name:var(--font-mono-num)] tabular-nums ${className ?? ''}`}
-      title="Estimated — interpolated from the last data refresh">
+      title="Estimated - interpolated from the last data refresh">
       {formatCo2Kg(display)}
     </span>
   );
 };
 ```
 
-- [ ] **Step 3: Write `src/components/ui/SourceBadge.tsx`** — provenance labels (decisions 1 & 8):
+- [ ] **Step 3: Write `src/components/ui/SourceBadge.tsx`** - provenance labels (decisions 1 & 8):
 
 ```tsx
 const STYLES: Record<string, { label: string; cls: string; title: string }> = {
   adsb: { label: 'LIVE', cls: 'text-pos border-pos/40', title: 'Tracked via public ADS-B data' },
-  sim: { label: 'SIMULATED', cls: 'text-dim border-panel-edge', title: 'Simulated plausible route — see methodology' },
-  auto: { label: 'AI-CLASSIFIED', cls: 'text-accent border-accent/40', title: 'Auto-classified from a news source — click source to verify' },
-  estimated: { label: 'ESTIMATED', cls: 'text-amber-400 border-amber-400/40', title: 'Computed estimate — see methodology' },
+  sim: { label: 'SIMULATED', cls: 'text-dim border-panel-edge', title: 'Simulated plausible route - see methodology' },
+  auto: { label: 'AI-CLASSIFIED', cls: 'text-accent border-accent/40', title: 'Auto-classified from a news source - click source to verify' },
+  estimated: { label: 'ESTIMATED', cls: 'text-amber-400 border-amber-400/40', title: 'Computed estimate - see methodology' },
 };
 
 export const SourceBadge = ({ kind }: { kind: keyof typeof STYLES }) => {
@@ -2198,7 +2198,7 @@ export const SourceBadge = ({ kind }: { kind: keyof typeof STYLES }) => {
 };
 ```
 
-- [ ] **Step 4: Commit** — `git commit -am "feat: co2 ticker, provenance badges, earth texture"`
+- [ ] **Step 4: Commit** - `git commit -am "feat: co2 ticker, provenance badges, earth texture"`
 
 ### Task 24: Sidebar (search + leaderboard + bottom sheet)
 
@@ -2267,7 +2267,7 @@ export const LeaderboardRow = ({ entry }: { entry: LeaderboardEntry }) => {
 };
 ```
 
-- [ ] **Step 3: Write `src/components/sidebar/Sidebar.tsx`** — desktop panel / mobile bottom sheet:
+- [ ] **Step 3: Write `src/components/sidebar/Sidebar.tsx`** - desktop panel / mobile bottom sheet:
 
 ```tsx
 'use client';
@@ -2321,13 +2321,13 @@ export const Sidebar = ({ entries }: { entries: LeaderboardEntry[] }) => {
 };
 ```
 
-- [ ] **Step 4: Commit** — `git commit -am "feat: searchable leaderboard sidebar with favorites and mobile bottom sheet"`
+- [ ] **Step 4: Commit** - `git commit -am "feat: searchable leaderboard sidebar with favorites and mobile bottom sheet"`
 
 ---
 
-# Phase 7 — The Globe
+# Phase 7 - The Globe
 
-Produces: interactive night-lights globe with markers, animated arcs, GSAP fly-to camera, adaptive quality, selection popup — the complete main view.
+Produces: interactive night-lights globe with markers, animated arcs, GSAP fly-to camera, adaptive quality, selection popup - the complete main view.
 
 ### Task 25: Canvas, Earth, quality tiers
 
@@ -2370,7 +2370,7 @@ export const Earth = ({ segments = 64 }: { segments?: number }) => {
 };
 ```
 
-- [ ] **Step 2: Write `src/components/globe/GlobeCanvas.tsx`** — quality tiers via `PerformanceMonitor` (decision 12):
+- [ ] **Step 2: Write `src/components/globe/GlobeCanvas.tsx`** - quality tiers via `PerformanceMonitor` (decision 12):
 
 ```tsx
 'use client';
@@ -2418,7 +2418,7 @@ export const GlobeCanvas = ({ data }: { data: PositionsPayload }) => {
 };
 ```
 
-- [ ] **Step 3: Commit** — `git commit -am "feat: globe canvas with night earth, atmosphere, adaptive quality"`
+- [ ] **Step 3: Commit** - `git commit -am "feat: globe canvas with night earth, atmosphere, adaptive quality"`
 
 ### Task 26: Markers, arcs, camera rig
 
@@ -2478,7 +2478,7 @@ export const VehicleMarkers = ({ positions }: { positions: PositionsPayload['pos
 };
 ```
 
-- [ ] **Step 2: Write `src/components/globe/RouteArcs.tsx`** — animated arc from trip start to current position:
+- [ ] **Step 2: Write `src/components/globe/RouteArcs.tsx`** - animated arc from trip start to current position:
 
 ```tsx
 'use client';
@@ -2531,7 +2531,7 @@ export const RouteArcs = ({ trips, positions }: {
 };
 ```
 
-- [ ] **Step 3: Write `src/components/globe/CameraRig.tsx`** — GSAP fly-to on selection (decision: GSAP for camera transitions):
+- [ ] **Step 3: Write `src/components/globe/CameraRig.tsx`** - GSAP fly-to on selection (decision: GSAP for camera transitions):
 
 ```tsx
 'use client';
@@ -2567,7 +2567,7 @@ export const CameraRig = ({ positions }: { positions: PositionsPayload['position
 
 (OrbitControls keeps target at origin, so animating only the camera position gives the Google-Maps-like fly-to; controls damping takes over after the tween.)
 
-- [ ] **Step 4: Commit** — `git commit -am "feat: vehicle markers, animated route arcs, gsap camera fly-to"`
+- [ ] **Step 4: Commit** - `git commit -am "feat: vehicle markers, animated route arcs, gsap camera fly-to"`
 
 ### Task 27: Main page assembly + info popup + live feed
 
@@ -2725,13 +2725,13 @@ const HomePage = async () => {
 export default HomePage;
 ```
 
-- [ ] **Step 4: Verify in browser** — `npm run dev`; globe renders, markers clickable (camera flies, popup opens), sidebar search filters, mobile viewport (devtools) shows bottom sheet. Fix console errors before committing.
+- [ ] **Step 4: Verify in browser** - `npm run dev`; globe renders, markers clickable (camera flies, popup opens), sidebar search filters, mobile viewport (devtools) shows bottom sheet. Fix console errors before committing.
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: main view — globe + sidebar + popup + live feed"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: main view - globe + sidebar + popup + live feed"`
 
 ---
 
-# Phase 8 — Detail Dashboard & Content Pages
+# Phase 8 - Detail Dashboard & Content Pages
 
 > Reminder: `ui-ux-pro-max:ui-ux-pro-max` design system governs styling here too.
 
@@ -2803,7 +2803,7 @@ export const ActionColumns = ({ events }: { events: PersonDetail['events'] }) =>
         <ul className="space-y-3">
           {positive.map((e) => <ActionItem key={e.id} event={e} />)}
           {positive.length === 0 && (
-            <li className="text-sm text-dim">Radio silence. Not one documented green word. (At least they're consistent — multiplier stays at 1×.)</li>
+            <li className="text-sm text-dim">Radio silence. Not one documented green word. (At least they're consistent - multiplier stays at 1×.)</li>
           )}
         </ul>
       </section>
@@ -2815,7 +2815,7 @@ export const ActionColumns = ({ events }: { events: PersonDetail['events'] }) =>
         <ul className="space-y-3">
           {negative.map((e) => <ActionItem key={e.id} event={e} />)}
           {negative.length === 0 && (
-            <li className="text-sm text-dim">No documented emissions yet — either a saint or a very good transponder switch.</li>
+            <li className="text-sm text-dim">No documented emissions yet - either a saint or a very good transponder switch.</li>
           )}
         </ul>
       </section>
@@ -2824,7 +2824,7 @@ export const ActionColumns = ({ events }: { events: PersonDetail['events'] }) =>
 };
 ```
 
-- [ ] **Step 3: Write `src/components/person/ScoreBreakdown.tsx`** — the transparent formula (decision 6):
+- [ ] **Step 3: Write `src/components/person/ScoreBreakdown.tsx`** - the transparent formula (decision 6):
 
 ```tsx
 import type { PersonDetail } from '@/lib/api-types';
@@ -2832,7 +2832,7 @@ import { formatScore } from '@/lib/format';
 
 export const ScoreBreakdown = ({ snapshot }: { snapshot: NonNullable<PersonDetail['snapshot']> }) => (
   <div className="rounded-xl border border-panel-edge bg-panel p-4">
-    <p className="text-[10px] uppercase tracking-[0.2em] text-dim">Hypocrisy Score — full math, no magic</p>
+    <p className="text-[10px] uppercase tracking-[0.2em] text-dim">Hypocrisy Score - full math, no magic</p>
     <p className="mt-2 font-[family-name:var(--font-mono-num)] text-lg">
       <span className="text-neg">{(snapshot.co2Kg12m / 1000).toFixed(1)} t CO2</span>
       <span className="text-dim"> × </span>
@@ -2842,7 +2842,7 @@ export const ScoreBreakdown = ({ snapshot }: { snapshot: NonNullable<PersonDetai
     </p>
     <p className="mt-1 text-xs text-dim">
       Emissions (rolling 12 months, vehicles only) × advocacy multiplier (1–10, decaying over 24 months).{' '}
-      <a href="/methodology" className="text-accent hover:underline">Methodology</a> — this score is a
+      <a href="/methodology" className="text-accent hover:underline">Methodology</a> - this score is a
       satirical editorial assessment based on the sourced events below.
     </p>
   </div>
@@ -2899,18 +2899,18 @@ const PersonPage = async ({ params }: { params: Promise<{ slug: string }> }) => 
 export default PersonPage;
 ```
 
-(`AdSlot` is created in Task 30 — create it first if executing out of order; it renders `null` without env config.)
+(`AdSlot` is created in Task 30 - create it first if executing out of order; it renders `null` without env config.)
 
-- [ ] **Step 5: Verify** — `npm run dev`, open `/person/elon-musk`: breakdown shows `E × M = Score`, two colored columns render with source links and badges.
+- [ ] **Step 5: Verify** - `npm run dev`, open `/person/elon-musk`: breakdown shows `E × M = Score`, two colored columns render with source links and badges.
 
-- [ ] **Step 6: Commit** — `git commit -am "feat: person detail dashboard with side-by-side action columns"`
+- [ ] **Step 6: Commit** - `git commit -am "feat: person detail dashboard with side-by-side action columns"`
 
 ### Task 29: Methodology, imprint, privacy pages
 
 **Files:**
 - Create: `src/app/methodology/page.tsx`, `src/app/imprint/page.tsx`, `src/app/privacy/page.tsx`
 
-- [ ] **Step 1: Write `src/app/methodology/page.tsx`** — the legal backbone (decision 2). Content must cover, in English, in this order:
+- [ ] **Step 1: Write `src/app/methodology/page.tsx`** - the legal backbone (decision 2). Content must cover, in English, in this order:
   1. *What this site is*: satirical editorial project; scores are opinions derived from sourced facts.
   2. *The formula*: `score = co2Tons12m × multiplier`, the multiplier definition with the exact weights table from `CONFIG.score.advocacyWeights`, half-life 730 days, cap 10.
   3. *Emission estimates*: jet kg-CO2/km table from `JET_MODEL_KG_PER_KM`, yacht default 90 kg/km, ×3.16 Jet-A factor, "estimates, not measurements".
@@ -2963,15 +2963,15 @@ multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ weight × 0.5^(ageDay
     </p>
     <h2 className="mt-8 text-lg font-medium">Data provenance & labels</h2>
     <ul className="mt-2 list-disc space-y-1 pl-5 text-dim">
-      <li><b className="text-pos">LIVE</b> — public ADS-B transponder data (adsb.lol).</li>
-      <li><b>SIMULATED</b> — plausible fictional voyages for vehicles without public tracking. Never the basis for claims about a real trip.</li>
-      <li><b className="text-accent">AI-CLASSIFIED</b> — events extracted from news articles by a language model
+      <li><b className="text-pos">LIVE</b> - public ADS-B transponder data (adsb.lol).</li>
+      <li><b>SIMULATED</b> - plausible fictional voyages for vehicles without public tracking. Never the basis for claims about a real trip.</li>
+      <li><b className="text-accent">AI-CLASSIFIED</b> - events extracted from news articles by a language model
         (confidence ≥ {CONFIG.score.confidenceThreshold}); the linked source is authoritative, our classification is editorial.</li>
     </ul>
     <h2 className="mt-8 text-lg font-medium">Corrections</h2>
     <p className="mt-2 text-dim">
       Spotted an event whose source doesn't support it? Open an issue on GitHub or write to the
-      address in the imprint — substantiated complaints lead to correction or removal.
+      address in the imprint - substantiated complaints lead to correction or removal.
     </p>
   </main>
 );
@@ -2979,21 +2979,21 @@ multiplier = 1 + min(${CONFIG.score.multiplierCap - 1}, Σ weight × 0.5^(ageDay
 export default MethodologyPage;
 ```
 
-- [ ] **Step 2: Write `src/app/imprint/page.tsx` and `src/app/privacy/page.tsx`** — static pages with the theme styling. Imprint: operator name/address placeholder constants at the top of the file marked `// FILL BEFORE LAUNCH (legal requirement §5 TMG/DDG)` — the build must not ship to production until filled (add a `TODO:` lint note in README launch checklist, Task 32). Privacy policy sections: hosting (Vercel, server logs), localStorage favorites (functional, no consent required), consent management + Google AdSense (cookies, profiling, opt-out via CMP re-open link `<button onClick={() => window.googlefc?.showRevocationMessage?.()}>`), data subject rights (GDPR Art. 15–21), no accounts/no tracking beyond ads.
+- [ ] **Step 2: Write `src/app/imprint/page.tsx` and `src/app/privacy/page.tsx`** - static pages with the theme styling. Imprint: operator name/address placeholder constants at the top of the file marked `// FILL BEFORE LAUNCH (legal requirement §5 TMG/DDG)` - the build must not ship to production until filled (add a `TODO:` lint note in README launch checklist, Task 32). Privacy policy sections: hosting (Vercel, server logs), localStorage favorites (functional, no consent required), consent management + Google AdSense (cookies, profiling, opt-out via CMP re-open link `<button onClick={() => window.googlefc?.showRevocationMessage?.()}>`), data subject rights (GDPR Art. 15–21), no accounts/no tracking beyond ads.
 
-- [ ] **Step 3: Add footer links** — extend `src/app/layout.tsx` body with a fixed-bottom-right minimal footer: `<footer className="pointer-events-auto fixed bottom-1 right-2 z-30 text-[10px] text-dim"><a href="/methodology">methodology</a> · <a href="/imprint">imprint</a> · <a href="/privacy">privacy</a></footer>`.
+- [ ] **Step 3: Add footer links** - extend `src/app/layout.tsx` body with a fixed-bottom-right minimal footer: `<footer className="pointer-events-auto fixed bottom-1 right-2 z-30 text-[10px] text-dim"><a href="/methodology">methodology</a> · <a href="/imprint">imprint</a> · <a href="/privacy">privacy</a></footer>`.
 
-- [ ] **Step 4: Commit** — `git commit -am "feat: methodology, imprint, privacy pages"`
+- [ ] **Step 4: Commit** - `git commit -am "feat: methodology, imprint, privacy pages"`
 
 ---
 
-# Phase 9 — Consent, Ads, Deploy
+# Phase 9 - Consent, Ads, Deploy
 
 Produces: consent-gated AdSense integration, public GitHub repo with working schedules, production deployment on Vercel.
 
 ### Task 30: Google CMP + consent-gated ad slots
 
-Per decision 10/11: Google's certified CMP ("Privacy & messaging", configured inside the AdSense account) ships bundled with the AdSense tag — we do NOT build a banner. Everything is inert until `NEXT_PUBLIC_ADSENSE_CLIENT` is set (AdSense approval requires the live site first — chicken-and-egg is handled by deploying without the env var, applying, then setting it).
+Per decision 10/11: Google's certified CMP ("Privacy & messaging", configured inside the AdSense account) ships bundled with the AdSense tag - we do NOT build a banner. Everything is inert until `NEXT_PUBLIC_ADSENSE_CLIENT` is set (AdSense approval requires the live site first - chicken-and-egg is handled by deploying without the env var, applying, then setting it).
 
 **Files:**
 - Create: `src/components/ui/ConsentLoader.tsx`, `src/components/ui/AdSlot.tsx`
@@ -3055,13 +3055,13 @@ export const AdSlot = ({ slot }: { slot: string }) => {
 };
 ```
 
-(Google's CMP gates ad personalization/serving on the consent signal itself — TCF consent is enforced by the ad tag, so no extra gating code is needed; the CMP message appears automatically for EEA visitors once configured in AdSense.)
+(Google's CMP gates ad personalization/serving on the consent signal itself - TCF consent is enforced by the ad tag, so no extra gating code is needed; the CMP message appears automatically for EEA visitors once configured in AdSense.)
 
 - [ ] **Step 3: Mount `<ConsentLoader />` in `src/app/layout.tsx`** inside `<body>` before `{children}`. Add a second `<AdSlot slot="sidebar-bottom" />` at the bottom of `Sidebar.tsx`'s scroll list.
 
-- [ ] **Step 4: Verify** — without the env var: no script tag, no ad markup (view source). With a dummy `NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-0000000000000000`: script tag present, slot renders (errors from Google are expected with the dummy id).
+- [ ] **Step 4: Verify** - without the env var: no script tag, no ad markup (view source). With a dummy `NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-0000000000000000`: script tag present, slot renders (errors from Google are expected with the dummy id).
 
-- [ ] **Step 5: Commit** — `git commit -am "feat: consent-gated adsense integration via google certified cmp"`
+- [ ] **Step 5: Commit** - `git commit -am "feat: consent-gated adsense integration via google certified cmp"`
 
 ### Task 31: README + launch checklist
 
@@ -3082,13 +3082,13 @@ export const AdSlot = ({ slot }: { slot: string }) => {
 - [ ] Lighthouse: mobile performance ≥ 80, no console errors on mid-range phone
 ```
 
-- [ ] **Step 2: Commit** — `git add README.md; git commit -m "docs: readme with setup and launch checklist"`
+- [ ] **Step 2: Commit** - `git add README.md; git commit -m "docs: readme with setup and launch checklist"`
 
 ### Task 32: GitHub + Vercel deployment
 
 **Files:** none (operational task)
 
-- [ ] **Step 1: Push branches** — the public repo already exists (created at project start). Push `develop`, then merge develop→main for the release and push both:
+- [ ] **Step 1: Push branches** - the public repo already exists (created at project start). Push `develop`, then merge develop→main for the release and push both:
 
 ```powershell
 git push -u origin develop
@@ -3105,7 +3105,7 @@ gh secret set INGEST_SECRET --body "<same value as .env.local>"
 gh secret set APP_URL --body "https://<project>.vercel.app"   # update after Step 3 if needed
 ```
 
-- [ ] **Step 3: Create the Vercel project** — `npx vercel link` (new project), then set env vars for Production+Preview: `DATABASE_URL`, `INGEST_SECRET`, `CRON_SECRET` (= INGEST_SECRET), `AI_GATEWAY_API_KEY`, `NEXT_PUBLIC_BASE_URL`. Deploy: `npx vercel deploy --prod`.
+- [ ] **Step 3: Create the Vercel project** - `npx vercel link` (new project), then set env vars for Production+Preview: `DATABASE_URL`, `INGEST_SECRET`, `CRON_SECRET` (= INGEST_SECRET), `AI_GATEWAY_API_KEY`, `NEXT_PUBLIC_BASE_URL`. Deploy: `npx vercel deploy --prod`.
 
 - [ ] **Step 4: Smoke test production**
 
@@ -3117,7 +3117,7 @@ curl -X POST https://<project>.vercel.app/api/ingest/live  # 401
 
 Open the production URL: globe renders, click marker → camera flies → popup; `/person/elon-musk` shows columns; trigger the GitHub workflow manually (`gh workflow run live-ingest`) and confirm a new `positions` row.
 
-- [ ] **Step 5: Confirm the daily cron is registered** — Vercel dashboard → project → Settings → Cron Jobs shows `/api/ingest/daily @ 0 4 * * *`.
+- [ ] **Step 5: Confirm the daily cron is registered** - Vercel dashboard → project → Settings → Cron Jobs shows `/api/ingest/daily @ 0 4 * * *`.
 
 - [ ] **Step 6: Final commit & tag**
 
@@ -3130,12 +3130,12 @@ git push --tags
 
 ## Self-Review (performed while writing)
 
-1. **Spec coverage:** 3D globe (T25–27), Google-Maps-feel controls (OrbitControls damping + GSAP fly-to, T25/26), vehicle pins (T26), animated route curves (T26), searchable sidebar with name/CO2/ranking (T24), click-to-fly + infobox (T26/27), detail page with side-by-side green/red chronological lists (T28), hypocrisy formula with snitch multiplier (T6), daily pipeline (T14–16), 24h-distance CO2 (T12/T14), ticking counter (T23), live top-20 updates (T16), Tailwind/GSAP/dark design (T22+, ui-ux-pro-max), APIs found (adsb.lol, GDELT, Google News RSS — T11/T17), caching (T20), cookie consent (T30), favorites in localStorage (T22/T24), reusable code (pure cores in `lib/`, config-driven). 50 persons + self-maintaining (T9/T10/T18/T19). German user requirements all mapped.
-2. **Placeholder scan:** the imprint operator data is intentionally a launch-blocking TODO (personal legal data the executor cannot invent) — tracked in the README launch checklist; everything else ships concrete code or exact content lists.
+1. **Spec coverage:** 3D globe (T25–27), Google-Maps-feel controls (OrbitControls damping + GSAP fly-to, T25/26), vehicle pins (T26), animated route curves (T26), searchable sidebar with name/CO2/ranking (T24), click-to-fly + infobox (T26/27), detail page with side-by-side green/red chronological lists (T28), hypocrisy formula with snitch multiplier (T6), daily pipeline (T14–16), 24h-distance CO2 (T12/T14), ticking counter (T23), live top-20 updates (T16), Tailwind/GSAP/dark design (T22+, ui-ux-pro-max), APIs found (adsb.lol, GDELT, Google News RSS - T11/T17), caching (T20), cookie consent (T30), favorites in localStorage (T22/T24), reusable code (pure cores in `lib/`, config-driven). 50 persons + self-maintaining (T9/T10/T18/T19). German user requirements all mapped.
+2. **Placeholder scan:** the imprint operator data is intentionally a launch-blocking TODO (personal legal data the executor cannot invent) - tracked in the README launch checklist; everything else ships concrete code or exact content lists.
 3. **Type consistency:** `Co2Ticker` props (`baseKg`, `ratePerSec`, `snapshotAt`) match all three call sites; `select(personId, vehicleId?)` matches all callers; `PositionsPayload` shape produced by `getCurrentPositions` matches `GlobeCanvas`/`RouteArcs`/`InfoPopup` consumption; `runNewsScan` stub (T15) is replaced with the same exported name + compatible return type (T18); `AdSlot` used in T28 is defined in T30 with a no-env null fallback (noted inline).
 
 **Known risks for the executor:**
-- `drei`'s `Line` ref type (`Line2`) and `PerformanceMonitor` API move between versions — adjust imports to the installed version if TS complains.
+- `drei`'s `Line` ref type (`Line2`) and `PerformanceMonitor` API move between versions - adjust imports to the installed version if TS complains.
 - adsb.lol response field names (`alt_baro`, `gs`, `track`) are v2 API; verify one real response before trusting the parser fixture.
 - Drizzle `$with`/CTE syntax varies by version; `getLeaderboard` may need `sql` casts on the join columns.
 - GDELT artlist JSON occasionally returns HTML on rate-limit; the try/catch fallback covers it, but expect noisy logs on the backfill.

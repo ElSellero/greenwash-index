@@ -5,8 +5,8 @@ export const CONFIG = {
   },
   live: {
     /**
-     * Target cadence (min) for the GitHub Actions live scan. Keep >= 10 —
-     * free community APIs. NOTE: this is best-effort only — GitHub drops/delays
+     * Target cadence (min) for the GitHub Actions live scan. Keep >= 10 -
+     * free community APIs. NOTE: this is best-effort only - GitHub drops/delays
      * scheduled runs at peak load, so the *effective* interval is ~30–60 min
      * (~10–16 runs/day). The guaranteed full news scan is the Vercel cron
      * `/api/ingest/news` at 08:00 UTC (see vercel.json); the live scan just
@@ -31,7 +31,7 @@ export const CONFIG = {
       preaching: 5,
     } as const,
     /**
-     * Rhetoric floor — documented-but-unquantified "what they do" acts (flight/yacht/asset
+     * Rhetoric floor - documented-but-unquantified "what they do" acts (flight/yacht/asset
      * news without a CO2 figure) add a SMALL score, AMPLIFIED by the advocacy multiplier
      * (green talk × dirty deeds). Positive advocacy alone never scores: no documented act
      * ⇒ floor 0, so a consistent climate advocate stays at zero. Kept tiny + capped so real
@@ -61,7 +61,7 @@ export const CONFIG = {
      * A documented news flight / yacht trip is a real high-emission ACT, but the
      * article rarely states the distance. Rather than letting it vanish (CO2 = 0,
      * only a tiny rhetoric-floor point), we assign a deliberately CONSERVATIVE
-     * estimated tonnage = representativeKm × the person's known vehicle factor —
+     * estimated tonnage = representativeKm × the person's known vehicle factor -
      * the same kg/km math the live tracker uses, just with a stand-in distance.
      * Clearly surfaced as "estimated". Understates frequent flyers on purpose.
      */
@@ -76,7 +76,7 @@ export const CONFIG = {
   },
   globe: {
     radius: 1,
-    /** Radii (globe = 1) — exaggerated so heights read at globe scale. */
+    /** Radii (globe = 1) - exaggerated so heights read at globe scale. */
     surfaceAltitude: 1.0035,
     flightAltitude: 1.035,
     trailAltitude: 1.0015,
