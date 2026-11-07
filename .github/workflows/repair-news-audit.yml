@@ -1,0 +1,29 @@
+name: repair-news-audit
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Apply the reviewed November 7 news corrections
+        type: boolean
+        default: false
+      release_cancelled_lease:
+        description: Release lease only after confirming the previous backfill is stopped
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: backfill
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npx tsx scripts/repair-news-audit.ts ${{ inputs.apply && '--apply' || '' }} ${{ inputs.release_cancelled_lease && '--release-cancelled-lease' || '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

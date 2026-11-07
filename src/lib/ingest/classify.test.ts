@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { passesGuardrails, classificationSchema, validEventDate } from '@/lib/ingest/classify';
+import { passesGuardrails, classificationSchema, validEventDate, headlineSupportsClassification } from '@/lib/ingest/classify';
 
 const base = {
   relevant: true, kind: 'positive' as const, type: 'speech' as const,
@@ -38,4 +38,15 @@ it('rejects impossible dates before persistence', () => {
   expect(validEventDate('2026-02-30')).toBe(false);
   expect(validEventDate('2026-13-01')).toBe(false);
   expect(validEventDate('2026-06-08T12:00:00Z')).toBe(true);
+});
+
+it('requires source evidence of an environmental donation, not general philanthropy', () => {
+  const donation = { ...base, type: 'donation' as const };
+  expect(headlineSupportsClassification(donation, 'Taylor Swift and Travis Kelce donate to Nashville grocery charity')).toBe(false);
+  expect(headlineSupportsClassification(donation, 'Bezos donates $10 billion to fight climate change')).toBe(true);
+});
+it('distinguishes discussion of climate science from preaching lifestyle changes', () => {
+  const preaching = { ...base, type: 'preaching' as const };
+  expect(headlineSupportsClassification(preaching, 'Bill Gates discusses the climate impact of contrails')).toBe(false);
+  expect(headlineSupportsClassification(preaching, 'Bill Gates urges people to fly less for the climate')).toBe(true);
 });

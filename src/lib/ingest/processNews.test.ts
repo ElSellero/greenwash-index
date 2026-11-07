@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-const mocks = vi.hoisted(() => ({ generateObject: vi.fn(), insert: vi.fn(), writes: [] as string[], failEvent: false }));
+const mocks = vi.hoisted(() => ({ generateObject: vi.fn(), insert: vi.fn(), writes: [] as string[], failEvent: false, existing: false }));
 vi.mock('ai', () => ({ generateObject: mocks.generateObject }));
 vi.mock('@/lib/db/client', async () => {
   const { events } = await import('@/lib/db/schema');
   return { db: {
-    select: () => ({ from: () => ({ where: () => ({
-      limit: async () => [], then: (resolve: (v: unknown[]) => void) => resolve([]),
+    select: () => ({ from: (table: unknown) => ({ where: () => ({
+      limit: async () => mocks.existing && table === events ? [{ id: 1 }] : [], then: (resolve: (v: unknown[]) => void) => resolve([]),
     }) }) }),
     insert: (table: unknown) => ({ values: () => {
       const name = table === events ? 'event' : 'seen';
@@ -24,10 +24,17 @@ beforeEach(() => {
   vi.stubEnv('GOOGLE_GENERATIVE_AI_API_KEY', '');
   vi.stubEnv('OLLAMA_MODEL', '');
   mocks.failEvent = false;
+  mocks.existing = false;
   mocks.writes.length = 0;
-  mocks.generateObject.mockResolvedValue({ object: classification });
+  mocks.generateObject.mockReset().mockResolvedValue({ object: classification });
 });
 describe('news persistence', () => {
+  it('does not classify an already processed source', async () => {
+    mocks.existing = true;
+    expect(await processNewsArticle(person, article)).toBe('seen');
+    expect(mocks.generateObject).not.toHaveBeenCalled();
+    expect(mocks.writes).toEqual(['seen']);
+  });
   it('deduplicates per person, not globally', () => {
     expect(articleHash(1, article.url)).not.toBe(articleHash(2, article.url));
   });

@@ -36,6 +36,7 @@ export const dedupeArticles = (articles: Article[]): Article[] => {
 const CLIMATE_TERMS = '(climate OR emissions OR sustainability OR "private jet" OR yacht OR donation)';
 export type NewsFetchResult = { articles: Article[]; errors: string[]; sourcesOk: number };
 let nextGdeltRequest = 0;
+let gdeltBlockedUntil = 0;
 
 export const fetchArticlesFor = async (
   slug: string, name: string, lookbackDays = 14,
@@ -49,10 +50,17 @@ export const fetchArticlesFor = async (
   for (const source of sources) {
     try {
       if (source.name === 'gdelt') {
+        if (Date.now() < gdeltBlockedUntil) throw new Error('cooldown after HTTP 429');
         await new Promise(r => setTimeout(r, Math.max(0, nextGdeltRequest - Date.now())));
         nextGdeltRequest = Date.now() + 6_000;
       }
       const res = await fetch(source.url, { signal: AbortSignal.timeout(10_000) });
+      if (source.name === 'gdelt' && res.status === 429) {
+        const retryAfter = res.headers.get('retry-after');
+        const seconds = Number(retryAfter);
+        const retryAt = retryAfter && !Number.isFinite(seconds) ? Date.parse(retryAfter) : Date.now() + seconds * 1000;
+        gdeltBlockedUntil = Math.max(Date.now() + 300_000, Number.isFinite(retryAt) ? retryAt : 0);
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       result.articles.push(...(source.name === 'google'
         ? parseGoogleNewsRss(await res.text()) : parseGdelt(await res.json())));
