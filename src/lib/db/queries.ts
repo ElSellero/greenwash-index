@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, inArray, notLike, sql } from 'drizzle-orm';
 import { db } from './client';
 import { events, persons, positions, scoreSnapshots, trips, vehicles } from './schema';
 import { allTimeScore } from '@/lib/score/hypocrisy';
@@ -17,6 +17,7 @@ export const getLeaderboard = async () => {
   const co2OfType = (type: 'flight' | 'yacht_trip', last12m: boolean) => sql<number>`coalesce((
     select sum(e.co2_kg * e.weight_factor) from ${events} e
     where e.person_id = ${scoreSnapshots.personId} and e.kind = 'negative' and e.type = ${type}
+    and e.source_url not like '%/methodology#simulated'
     ${last12m ? sql`and e.occurred_at >= now() - interval '365 days'` : sql``}), 0)`;
   const rows = await db.with(latest)
     .select({
@@ -121,12 +122,15 @@ export const getRecentEvents = async (limit = 20) => {
     type: events.type,
     title: events.title,
     occurredAt: events.occurredAt,
+    createdAt: events.createdAt,
+    classifier: events.classifier,
     sourceUrl: events.sourceUrl,
     autoClassified: events.autoClassified,
   })
     .from(events)
     .innerJoin(persons, eq(persons.id, events.personId))
-    .orderBy(desc(events.createdAt))
+    .where(and(gt(events.weightFactor, 0), notLike(events.sourceUrl, '%/methodology#simulated')))
+    .orderBy(desc(events.occurredAt), desc(events.id))
     .limit(limit);
   return rows.map((r) => ({ ...r, title: plainHyphens(r.title) }));
 };

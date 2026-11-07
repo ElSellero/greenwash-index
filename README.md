@@ -68,9 +68,14 @@ Found an event whose source doesn't support it? **Open an issue.** Substantiated
    every 30 min                 GitHub Actions → AIS sampler         yacht positions via AIS
    daily 04:00 UTC              Vercel Cron → /api/ingest/daily      every position → trips → CO2
                                                                      → scores → leaderboard
-   daily 08:00 UTC              Vercel Cron → /api/ingest/news       news scan → LLM classify
-                                                                     → guardrails → events
+   daily 08:00 UTC              Vercel Cron → /api/ingest/news       bounded news scan (14 days)
+                                                                     → classify → guardrails → events
+   daily 10:00 UTC              GitHub Actions → backfill            recent-news catch-up (89 days)
 ```
+
+Both news jobs share a durable cursor and expiring database lease. Each person gets at most three new classification attempts per pass; runs resume after the last visited person, including after errors. Source, classification and storage failures are counted in the scan summary; the catch-up job fails visibly on degraded runs. The additive `news_scan_state` table is created automatically on first use (the database role needs CREATE TABLE permission). [GDELT DOC 2.0](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/) only supports recent coverage, so the catch-up is not a historical archive import.
+
+The activity feed sorts by event date, displays dates, and refreshes with the leaderboard every five minutes and when returning to the tab. Simulated voyages are excluded from activity and scores; legacy rows remain labeled on person pages. Existing score snapshots are corrected by the next live/daily score recomputation.
 
 News sources: Google News RSS + GDELT (X/Twitter arrives indirectly - when a tweet matters, the news covers it). Classification runs through a schema-constrained LLM with hard guardrails: no resolvable source URL, no event. Below the confidence threshold, no event.
 
@@ -102,7 +107,7 @@ npm run db:seed    # load the 50-person roster
 npm run dev        # → http://localhost:3000
 ```
 
-One-time data bootstrap: `tsx scripts/research-vehicles.ts` (verify jets), then `npm run backfill` (historical events - takes a while, costs a few cents of LLM calls).
+One-time data bootstrap: `tsx scripts/research-vehicles.ts` (verify jets), then `npm run backfill` (recent-news catch-up; bounded to 150 classification attempts and 50 minutes per run).
 
 ## Security posture
 

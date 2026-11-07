@@ -94,3 +94,11 @@ export const seenArticles = pgTable('seen_articles', {
   urlHash: text('url_hash').notNull().unique(), // sha256 of canonical URL - ingest dedupe
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
+
+/** Shared cursor/lease for news ingestion (also bootstrapped on first scan). */
+export const newsScanState = pgTable('news_scan_state', {
+  id: integer('id').primaryKey(),
+  lastPersonId: integer('last_person_id').notNull().default(0),
+  leaseOwner: text('lease_owner'),
+  leaseUntil: timestamp('lease_until').notNull().default(new Date(0)),
+});

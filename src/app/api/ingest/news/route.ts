@@ -9,5 +9,7 @@ export const maxDuration = 300;
 export const GET = async (req: NextRequest) => {
   if (!isAuthorized(req.headers.get('authorization')))
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-  return NextResponse.json({ ok: true, news: await runNewsScan() });
+  const news = await runNewsScan();
+  return NextResponse.json({ ok: news.status === 'ok', news },
+    { status: news.status === 'failed' ? 503 : news.status === 'busy' ? 409 : 200 });
 };

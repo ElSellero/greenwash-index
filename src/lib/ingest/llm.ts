@@ -39,6 +39,7 @@ export const ollamaGenerateObject = async <T>(
   schema: z.ZodType<T>,
   system: string,
   prompt: string,
+  signal?: AbortSignal,
 ): Promise<T> => {
   const base = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434';
   const res = await fetch(`${base}/api/chat`, {
@@ -54,7 +55,7 @@ export const ollamaGenerateObject = async <T>(
         { role: 'user', content: prompt },
       ],
     }),
-    signal: AbortSignal.timeout(120_000),
+    signal: signal ?? AbortSignal.timeout(120_000),
   });
   if (!res.ok) throw new Error(`ollama ${res.status}: ${await res.text()}`);
   const data = (await res.json()) as { message?: { content?: string } };
@@ -127,14 +128,17 @@ export type Attempt<T> = { label: string; run: () => Promise<T> };
  */
 export const runWithFallback = async <T>(
   attempts: Attempt<T>[],
+  signal?: AbortSignal,
 ): Promise<{ value: T; label: string }> => {
   let lastErr: unknown;
   for (const attempt of attempts) {
     for (let i = 1; i <= ATTEMPTS_PER_MODEL; i++) {
+      signal?.throwIfAborted();
       try {
         return { value: await attempt.run(), label: attempt.label };
       } catch (err) {
         lastErr = err;
+        signal?.throwIfAborted();
         if (i < ATTEMPTS_PER_MODEL) await new Promise((r) => setTimeout(r, i * 800));
       }
     }

@@ -18,6 +18,7 @@ const GlobeCanvas = dynamic(
 );
 
 export const HomeClient = ({ initial }: { initial: { board: LeaderboardPayload; positions: PositionsPayload } }) => {
+  const [board, setBoard] = useState(initial.board);
   const [positions, setPositions] = useState(initial.positions);
   useEffect(() => {
     const id = setInterval(async () => {
@@ -28,6 +29,29 @@ export const HomeClient = ({ initial }: { initial: { board: LeaderboardPayload; 
     }, CONFIG.cache.positionsSMaxAge * 1000);
     return () => clearInterval(id);
   }, []);
+  useEffect(() => {
+    let active = true;
+    let pending = false;
+    const controller = new AbortController();
+    const refresh = async () => {
+      if (pending || document.visibilityState === 'hidden') return;
+      pending = true;
+      try {
+        const res = await fetch('/api/leaderboard', { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]) });
+        if (res.ok && active) setBoard(await res.json());
+      } catch { /* retain the last successful result; try again next interval */ }
+      finally { pending = false; }
+    };
+    void refresh();
+    const id = setInterval(refresh, CONFIG.cache.leaderboardSMaxAge * 1000);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      active = false;
+      controller.abort();
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, []);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), FLEET_REFRESH_MS);
@@ -35,8 +59,8 @@ export const HomeClient = ({ initial }: { initial: { board: LeaderboardPayload; 
   }, []);
   const vehicles = useMemo(() => resolveFleet(positions, now), [positions, now]);
   const names = useMemo(
-    () => new Map(initial.board.leaderboard.map((e) => [e.personId, e.name])),
-    [initial.board.leaderboard],
+    () => new Map(board.leaderboard.map((e) => [e.personId, e.name])),
+    [board.leaderboard],
   );
 
   return (
@@ -46,9 +70,9 @@ export const HomeClient = ({ initial }: { initial: { board: LeaderboardPayload; 
       </div>
       <GlobeLegend />
       <ScaleBar />
-      <Sidebar entries={initial.board.leaderboard} />
-      <InfoPopup entries={initial.board.leaderboard} positions={vehicles} />
-      <LiveFeed events={initial.board.recentEvents} />
+      <Sidebar entries={board.leaderboard} />
+      <InfoPopup entries={board.leaderboard} positions={vehicles} />
+      <LiveFeed events={board.recentEvents} />
     </main>
   );
 };

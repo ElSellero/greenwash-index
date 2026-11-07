@@ -27,16 +27,17 @@ export const translateToEnglish = async (
   title: string,
   summary: string,
 ): Promise<Translated | null> => {
+  const signal = AbortSignal.timeout(8_000);
   const attempts: Attempt<Translated>[] = classifierChain().map(({ label, model }) => ({
     label,
     run: async () => (await generateObject({
       model, schema, system: SYSTEM,
       prompt: `Title: ${sanitizeForPrompt(title)}\nSummary: ${sanitizeForPrompt(summary) || '(none)'}`,
-      abortSignal: AbortSignal.timeout(60_000),
+      abortSignal: signal,
     })).object,
   }));
   try {
-    return (await runWithFallback(attempts)).value;
+    return (await runWithFallback(attempts, signal)).value;
   } catch {
     return null;
   }

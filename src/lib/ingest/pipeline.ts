@@ -1,4 +1,4 @@
-import { and, eq, gt, isNull, sql } from 'drizzle-orm';
+import { and, eq, gt, isNull, notLike, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { events, positions, scoreSnapshots, trips, vehicles, persons } from '@/lib/db/schema';
 import { getTopNPersonIds, getVehiclesForPersons } from '@/lib/db/queries';
@@ -49,16 +49,14 @@ export const recordObservation = async (
       status: 'completed', endedAt: transition.endedAt,
       lastLat: transition.endLat, lastLng: transition.endLng, distanceKm: transition.totalKm,
     }).where(eq(trips.id, activeRow.id));
-    if (transition.totalKm >= 50) { // ignore repositioning hops
+    if (source !== 'sim' && transition.totalKm >= 50) { // ignore repositioning hops
       const isJet = vehicle.type === 'jet';
       await db.insert(events).values({
         personId: vehicle.personId,
         kind: 'negative',
         type: isJet ? 'flight' : 'yacht_trip',
         title: `${isJet ? 'Flight' : 'Yacht trip'} - ${Math.round(transition.totalKm)} km (${vehicle.name})`,
-        description: source === 'sim'
-          ? 'Simulated voyage (estimated, see methodology).'
-          : source === 'ais'
+        description: source === 'ais'
             ? 'Tracked via public AIS data.'
             : 'Tracked via public ADS-B data.',
         sourceUrl: source === 'adsb' && vehicle.icao24
@@ -91,15 +89,17 @@ export const recomputeScores = async (now = new Date()): Promise<number> => {
       kg12m: sql<number>`coalesce(sum(${events.co2Kg} * ${events.weightFactor}) filter (where ${events.occurredAt} >= ${windowStart}), 0)`,
       kgTotal: sql<number>`coalesce(sum(${events.co2Kg} * ${events.weightFactor}), 0)`,
       kg24h: sql<number>`coalesce(sum(${events.co2Kg} * ${events.weightFactor}) filter (where ${events.occurredAt} >= ${dayStart}), 0)`,
-    }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'negative')));
+    }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'negative'),
+      notLike(events.sourceUrl, '%/methodology#simulated')));
     const advocacy = await db.select({
       weight: events.advocacyWeight, weightFactor: events.weightFactor,
-    }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'positive')));
+    }).from(events).where(and(eq(events.personId, p.id), eq(events.kind, 'positive'),
+      notLike(events.sourceUrl, '%/methodology#simulated')));
     // documented "what they do" acts without a CO2 figure (news flights/yachts/assets)
     const negUnquantified = await db.select({ id: events.id })
       .from(events)
       .where(and(eq(events.personId, p.id), eq(events.kind, 'negative'), isNull(events.co2Kg),
-        gt(events.weightFactor, 0)));
+        gt(events.weightFactor, 0), notLike(events.sourceUrl, '%/methodology#simulated')));
 
     // echo/repeat events carry weightFactor < 1 so repetition can't inflate the score
     const m = advocacyMultiplier(advocacy.map((a) => ({ weight: (a.weight ?? 1) * (a.weightFactor ?? 1) })));

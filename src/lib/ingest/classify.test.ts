@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { passesGuardrails, classificationSchema } from '@/lib/ingest/classify';
+import { passesGuardrails, classificationSchema, validEventDate } from '@/lib/ingest/classify';
 
 const base = {
   relevant: true, kind: 'positive' as const, type: 'speech' as const,
@@ -32,4 +32,10 @@ describe('classificationSchema', () => {
   it('rejects non-date eventDate', () => {
     expect(classificationSchema.safeParse({ ...base, eventDate: 'June 8th' }).success).toBe(false);
   });
+});
+
+it('rejects impossible dates before persistence', () => {
+  expect(validEventDate('2026-02-30')).toBe(false);
+  expect(validEventDate('2026-13-01')).toBe(false);
+  expect(validEventDate('2026-06-08T12:00:00Z')).toBe(true);
 });
