@@ -74,3 +74,8 @@ it('requires a documented yacht trip or ownership rather than association', () =
   expect(headlineSupportsClassification(asset, 'Jeff Bezos buys a new superyacht')).toBe(true);
   expect(headlineSupportsClassification(trip, 'Jeff Bezos spotted aboard his superyacht')).toBe(true);
 });
+
+it('does not score an announced future speech as a completed act', () => {
+  expect(headlineSupportsClassification(base, 'Al Gore & Christiana Figueres To Headline AIB Sustainability Conference - Business Eye Magazine')).toBe(false);
+  expect(headlineSupportsClassification(base, 'Al Gore delivered a climate speech at the sustainability conference')).toBe(true);
+});
