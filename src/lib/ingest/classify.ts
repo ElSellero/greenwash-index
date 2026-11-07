@@ -53,7 +53,7 @@ relevant=true ONLY if the headline documents a concrete act by THIS person in on
 NEGATIVE (high-emission acts):
 - flight: a concrete flight report, never a generic live tracker/directory page. Their private jet/helicopter took flight(s), or a report about their jet's flights/emissions/usage. relevant=true EVEN IF the article is critical, satirical, or about "criticism".
 - yacht_trip: they cruised, used, or were seen on a yacht/superyacht.
-- asset: they bought or own a superyacht, private jet, or mega-mansion.
+- asset: a headline explicitly establishes they bought or currently own a superyacht, private jet, or mega-mansion. Designing a yacht, former ownership, donations/sales, lawsuits, VAT cases and mere association with a vessel do NOT establish current ownership.
 POSITIVE (pro-climate acts):
 - donation: gave money explicitly for a climate/environmental purpose. Food banks, free groceries, hospitals, education, politics and general philanthropy are NOT climate donations unless the headline states the environmental purpose.
 - investment: completed an investment in green/clean technology. A pledge, promise, plan, ambition or retrospective dollar amount is NOT evidence of money actually invested. Preserve uncertainty; never turn a pledge into a completed transfer.
@@ -146,7 +146,19 @@ export const headlineSupportsClassification = (c: Classification, headline: stri
   if (c.kind === 'negative' && c.type === 'flight'
     && /\b(tracker|tracking|flight history)\b/i.test(headline)
     && !/\b(flew|flown|took|landed|departed|flights? from|flights? to|[0-9]+ flights?)\b/i.test(headline)) return false;
-  if (c.kind !== 'positive') return true;
+  if (c.kind === 'negative') {
+    if (c.type === 'flight') {
+      return /\b(flew|flown|flying|flies|flights?|landed|departed|takeoff|takeoffs|emissions)\b/i.test(headline);
+    }
+    if (c.type === 'yacht_trip') {
+      return /\b(cruise|cruises|cruised|cruising|sail|sails|sailed|sailing|aboard|on board|vacation|vacations|holiday|spotted|seen|party|partying)\b/i.test(headline);
+    }
+    if (c.type === 'asset') {
+      if (/\b(former|previously owned|used to own|donated|sold)\b|['’]s old\b|\bdesigned\b/i.test(headline)) return false;
+      return /\b(owns?|owned|owning|owner|ownership|buys?|bought|purchase|purchases|purchased|acquires?|acquired)\b/i.test(headline);
+    }
+    return false;
+  }
   if (c.type === 'donation' || c.type === 'investment') {
     // A pledge or a retrospective dollar amount does not establish a completed transfer.
     if (/pledge|promise|plans? to|intends? to|will (donate|invest|give)/i.test(headline)) return false;

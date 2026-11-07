@@ -63,3 +63,14 @@ it('does not turn a retrospective sum or pledge into a completed investment', ()
   expect(headlineSupportsClassification(investment, 'Branson pledges to invest $3 billion in clean energy')).toBe(false);
   expect(headlineSupportsClassification(investment, 'Branson invests $3 million in clean energy company')).toBe(true);
 });
+
+it('requires a documented yacht trip or ownership rather than association', () => {
+  const asset = { ...base, kind: 'negative' as const, type: 'asset' as const };
+  const trip = { ...asset, type: 'yacht_trip' as const };
+  expect(headlineSupportsClassification(asset, "Why is John Travolta's old luxury jet in a small Australian town? - BBC")).toBe(false);
+  expect(headlineSupportsClassification(asset, '55m Giorgio Armani-designed Admiral yacht Navis returns to market')).toBe(false);
+  expect(headlineSupportsClassification(trip, 'Two Office Employees Face Trial Over €25 Million Abramovich Yacht VAT Case')).toBe(false);
+  expect(headlineSupportsClassification(asset, '€25 Million VAT Case in Cyprus Over Abramovich-Linked Luxury Yacht')).toBe(false);
+  expect(headlineSupportsClassification(asset, 'Jeff Bezos buys a new superyacht')).toBe(true);
+  expect(headlineSupportsClassification(trip, 'Jeff Bezos spotted aboard his superyacht')).toBe(true);
+});
