@@ -50,3 +50,16 @@ it('distinguishes discussion of climate science from preaching lifestyle changes
   expect(headlineSupportsClassification(preaching, 'Bill Gates discusses the climate impact of contrails')).toBe(false);
   expect(headlineSupportsClassification(preaching, 'Bill Gates urges people to fly less for the climate')).toBe(true);
 });
+
+it('rejects generic tracker pages as evidence of a newly dated flight', () => {
+  const flight = { ...base, kind: 'negative' as const, type: 'flight' as const };
+  expect(headlineSupportsClassification(flight, "Sergey Brin's Private Jet N232G — Live Jet Tracker & History - Celebplanes")).toBe(false);
+  expect(headlineSupportsClassification(flight, "David Geffen's Private Jet N221DG — Live Jet Tracker - Celebplanes")).toBe(false);
+  expect(headlineSupportsClassification(flight, "Jet tracker: Elon Musk's jet took 170 flights this year")).toBe(true);
+});
+it('does not turn a retrospective sum or pledge into a completed investment', () => {
+  const investment = { ...base, type: 'investment' as const };
+  expect(headlineSupportsClassification(investment, "From Selling Records to $3 Billion for Clean Energy: Richard Branson's Journey - AOL.ca")).toBe(false);
+  expect(headlineSupportsClassification(investment, 'Branson pledges to invest $3 billion in clean energy')).toBe(false);
+  expect(headlineSupportsClassification(investment, 'Branson invests $3 million in clean energy company')).toBe(true);
+});

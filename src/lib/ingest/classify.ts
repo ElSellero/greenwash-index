@@ -51,12 +51,12 @@ const SYSTEM = `You classify ONE news headline about a public figure for a clima
 
 relevant=true ONLY if the headline documents a concrete act by THIS person in one of these categories:
 NEGATIVE (high-emission acts):
-- flight: their private jet/helicopter took flight(s), or a report about their jet's flights/emissions/usage. relevant=true EVEN IF the article is critical, satirical, or about "criticism".
+- flight: a concrete flight report, never a generic live tracker/directory page. Their private jet/helicopter took flight(s), or a report about their jet's flights/emissions/usage. relevant=true EVEN IF the article is critical, satirical, or about "criticism".
 - yacht_trip: they cruised, used, or were seen on a yacht/superyacht.
 - asset: they bought or own a superyacht, private jet, or mega-mansion.
 POSITIVE (pro-climate acts):
 - donation: gave money explicitly for a climate/environmental purpose. Food banks, free groceries, hospitals, education, politics and general philanthropy are NOT climate donations unless the headline states the environmental purpose.
-- investment: invested in green/clean technology.
+- investment: completed an investment in green/clean technology. A pledge, promise, plan, ambition or retrospective dollar amount is NOT evidence of money actually invested. Preserve uncertainty; never turn a pledge into a completed transfer.
 - interview / speech / post: publicly stated a pro-climate view.
 - preaching: explicitly urged OTHER PEOPLE to change their personal behavior (fly less, eat less meat, live greener). Discussing climate science, contrails or technical solutions alone is NOT preaching; use post/interview/speech as supported by the headline.
 
@@ -142,8 +142,15 @@ export const classifyArticle = (
  * The English discovery feed must itself support the environmental purpose / behavioral appeal.
  */
 export const headlineSupportsClassification = (c: Classification, headline: string): boolean => {
-  if (!c.relevant || c.kind !== 'positive') return true;
+  if (!c.relevant) return true;
+  if (c.kind === 'negative' && c.type === 'flight'
+    && /\b(tracker|tracking|flight history)\b/i.test(headline)
+    && !/\b(flew|flown|took|landed|departed|flights? from|flights? to|[0-9]+ flights?)\b/i.test(headline)) return false;
+  if (c.kind !== 'positive') return true;
   if (c.type === 'donation' || c.type === 'investment') {
+    // A pledge or a retrospective dollar amount does not establish a completed transfer.
+    if (/pledge|promise|plans? to|intends? to|will (donate|invest|give)/i.test(headline)) return false;
+    if (!/donat|invest|\bfund(s|ed|ing)\b|financ|\bgrants?\b|\b(backed|backs|gave|gives|contributes|contributed)\b/i.test(headline)) return false;
     return /climate|environment|conservation|wildlife|biodiversity|renewable|solar|sustainab|carbon|emission|clean energy|green (energy|tech)|decarbon|reforest|deforest|ocean|planet/i.test(headline);
   }
   if (c.type === 'preaching') {
